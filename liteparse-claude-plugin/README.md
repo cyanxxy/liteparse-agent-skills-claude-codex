@@ -1,24 +1,38 @@
 # LiteParse plugin for Claude Code, Cowork & Codex
 
-Local document parsing via [LiteParse](https://github.com/run-llama/liteparse), packaged as a plugin for Claude Code, Claude Cowork, and OpenAI Codex. Repo name: **`liteparse-claude-codexplugin`**.
+Local document parsing via [LiteParse](https://github.com/run-llama/liteparse), packaged as a plugin for Claude Code, Claude Cowork, and OpenAI Codex. Repo name: **`liteparse-agent-skills-claude-codex`**.
 
-## What you get
+## Slash commands
 
-Four skills:
+| Command | Description |
+|---------|-------------|
+| `/liteparse:parse-document <file> [flags]` | Parse a single PDF, DOCX, XLSX, PPTX, image, or scan into text or JSON |
+| `/liteparse:batch-parse <input-dir> [output-dir] [flags]` | Parse every supported file in a directory |
+| `/liteparse:screenshot-document <file.pdf> [output-dir] [flags]` | Render PDF pages as PNG or JPG images |
+| `/liteparse:merge-parsed <files...> [-o output]` | Combine parsed outputs from multiple files into one document |
+| `/liteparse:compare-documents <file-a> <file-b> [-o diff]` | Parse two documents and produce a structured diff with summary |
+| `/liteparse:extract-tables <file> [--csv\|--json] [-o output]` | Extract tables from documents into CSV or structured JSON |
+| `/liteparse:convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
 
-- **`liteparse`** — background knowledge skill (not user-invocable). Tells Claude how to choose between `lit` and `npx`, which dependencies each file type needs, and which CLI flags exist.
-- **`/liteparse:parse-document <file> [flags]`** — parse a single PDF, DOCX, XLSX, PPTX, image, or scan into text or JSON.
-- **`/liteparse:batch-parse <input-dir> [output-dir] [flags]`** — walk a directory and parse every supported file.
-- **`/liteparse:screenshot-document <file.pdf> [output-dir] [flags]`** — render PDF pages as PNG or JPG.
+The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook execution instructions.
 
-Plus a sample config at `examples/liteparse.config.json` (referenced from the skills via relative links).
+## Post-parse hooks
+
+Define shell commands in `examples/liteparse.config.json` that run automatically after operations. Supported hooks:
+
+- `postParse` — after single file parse (`{{file}}`, `{{output}}`)
+- `postBatchParse` — after batch parse (`{{inputDir}}`, `{{outputDir}}`)
+- `postScreenshot` — after screenshot generation (`{{file}}`, `{{outputDir}}`)
+- `postConvert` — after format conversion (`{{file}}`, `{{output}}`)
+
+See the background `liteparse` skill for full hook documentation.
 
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback).
 - Optional: `lit` installed globally: `npm i -g @llamaindex/liteparse`.
-- Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, …).
-- Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, …).
+- Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
+- Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).
 
 If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse`.
 
@@ -27,18 +41,14 @@ If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse
 ### Claude Code
 
 ```bash
-claude plugin marketplace add cyanxxy/liteparse-claude-codexplugin
+claude plugin marketplace add cyanxxy/liteparse-agent-skills-claude-codex
 claude plugin install liteparse@local-liteparse
 ```
 
 ### Claude Cowork
 
-Cowork currently documents two install paths for custom plugins. Pick one:
-
-1. **Add a marketplace from GitHub.** Push this repo to GitHub, then in Cowork's plugin marketplace use "Add marketplace" and point it at `cyanxxy/liteparse-claude-codexplugin`. `liteparse` appears in the listing for install.
-2. **Upload a custom plugin file.** Package the `liteparse-claude-plugin/` directory and install it through Cowork's custom-plugin upload flow.
-
-Adding a local filesystem marketplace the way Claude Code does above (`claude plugin marketplace add /path`) is **not** a documented Cowork install path — use one of the two flows above instead.
+1. **GitHub sync**: push this repo to GitHub, then in Cowork's plugin marketplace use "Add marketplace" and enter `cyanxxy/liteparse-agent-skills-claude-codex`.
+2. **Manual upload (ZIP)**: package `liteparse-claude-plugin/` as a `.zip` and upload via Cowork's custom-plugin flow.
 
 ## Structure
 
@@ -49,14 +59,21 @@ liteparse-claude-plugin/
 ├── README.md
 ├── examples/liteparse.config.json
 └── skills/
-    ├── liteparse/SKILL.md              # reference knowledge
+    ├── liteparse/SKILL.md              # reference knowledge (auto-load)
     ├── parse-document/SKILL.md         # /liteparse:parse-document
     ├── batch-parse/SKILL.md            # /liteparse:batch-parse
-    └── screenshot-document/SKILL.md    # /liteparse:screenshot-document
+    ├── screenshot-document/SKILL.md    # /liteparse:screenshot-document
+    ├── merge-parsed/SKILL.md           # /liteparse:merge-parsed
+    ├── compare-documents/SKILL.md      # /liteparse:compare-documents
+    ├── extract-tables/SKILL.md         # /liteparse:extract-tables
+    └── convert-format/SKILL.md         # /liteparse:convert-format
 ```
 
-## Upstream
+## Credits
 
-- Repo: https://github.com/run-llama/liteparse
-- Docs: https://developers.llamaindex.ai/liteparse/
-- License: Apache-2.0 (matches this plugin).
+Built on [LiteParse](https://github.com/run-llama/liteparse) by the [LlamaIndex](https://www.llamaindex.ai/) team. All document parsing, OCR, and screenshot functionality comes from their work.
+
+- [LiteParse repo](https://github.com/run-llama/liteparse)
+- [LiteParse docs](https://developers.llamaindex.ai/liteparse/)
+- [LlamaIndex official agent skills](https://github.com/run-llama/llamaparse-agent-skills)
+- License: Apache-2.0 (matches upstream).

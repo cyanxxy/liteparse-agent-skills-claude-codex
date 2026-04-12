@@ -1,6 +1,6 @@
 # LiteParse for Codex
 
-Codex plugin from the [`liteparse-claude-codexplugin`](https://github.com/cyanxxy/liteparse-claude-codexplugin) repo. Packages LiteParse as a reusable skill.
+Codex plugin from the [`liteparse-agent-skills-claude-codex`](https://github.com/cyanxxy/liteparse-agent-skills-claude-codex) repo. Packages LiteParse as a reusable skill.
 
 ## Included
 

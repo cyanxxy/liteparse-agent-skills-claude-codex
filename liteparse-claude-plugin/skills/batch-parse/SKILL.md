@@ -12,14 +12,16 @@ Run LiteParse over every supported file in `$0`, writing results to `$1` (or a s
 ## Steps
 
 1. **Resolve `$0`** (input directory) relative to the project root. If it does not exist, stop and report the missing path. If no arguments were passed, ask for an input directory.
-2. **Resolve `$1`** (output directory). If the user omitted it, use `<input-dir>-liteparse-output` as a sibling of the input. Create it with `mkdir -p` before running.
+2. **Resolve `$1`** (output directory). The upstream CLI **requires** both positional directories. If the user omitted the output directory, ask for one before proceeding.
 3. **Parse extra flags from `$ARGUMENTS`**: `--format json|text`, `--recursive`, `--extension ".pdf"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--max-pages <n>`, `--password <pw>`, `--config <file>`, `-q`.
 4. **Choose the CLI**: run `which lit`. If it exists, use `lit batch-parse <input-dir> <output-dir> <flags>`. Otherwise, fall back to `npx -y @llamaindex/liteparse batch-parse <input-dir> <output-dir> <flags>` (no `lit` prefix under npx). Both positional directories are **required** by the upstream CLI — always pass both.
-5. **Report**:
+5. **Post-parse hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postBatchParse`, execute each command in the array after a successful batch. Substitute `{{inputDir}}` with the input directory and `{{outputDir}}` with the output directory before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the batch output. Show the user what hooks will run before first execution.
+6. **Report**:
    - input directory,
    - output directory,
    - filters applied (recursion, extension),
    - file counts (succeeded / failed) from the CLI's summary,
+   - hooks executed and their results,
    - the exact blocking error if the command fails. Do not invent a cause.
 
 ## Examples

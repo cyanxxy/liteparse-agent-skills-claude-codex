@@ -1,35 +1,27 @@
 ---
 name: liteparse
 description: Background knowledge for running LiteParse: choosing between installed lit and the npx fallback, verifying LibreOffice or ImageMagick dependencies, CLI flag reference, and failure handling across parsing workflows.
-user-invocable: false
-allowed-tools: Bash(which *) Bash(lit *) Bash(npx *) Bash(npm *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---
 
 # LiteParse Reference
 
-LiteParse is a local, no-cloud document parser. This skill is background knowledge: it tells Claude how to run LiteParse correctly. For user-triggered actions, prefer the specific skills `/liteparse:parse-document`, `/liteparse:batch-parse`, `/liteparse:screenshot-document`.
+LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills `/liteparse:parse-document`, `/liteparse:batch-parse`, and `/liteparse:screenshot-document`. Do not execute steps from this skill directly; defer to whichever action skill is active.
 
-## Choosing the CLI
+## CLI availability
 
-1. Check for an installed binary first:
-   ```bash
-   which lit
-   ```
-2. If `lit` exists, use it directly: `lit parse <file>`, `lit batch-parse <in> <out>`, `lit screenshot <file> -o <dir>`.
-3. If `lit` is missing but `npm` is available, fall back to npx. **Drop the `lit` prefix** — the subcommand comes first:
-   ```bash
-   npx -y @llamaindex/liteparse parse file.pdf --format json
-   npx -y @llamaindex/liteparse batch-parse ./in ./out --recursive
-   npx -y @llamaindex/liteparse screenshot file.pdf -o ./out --target-pages "1-3"
-   ```
-4. If `npm` is also missing, tell the user Node.js 18+ and npm are required.
+LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are registered: `lit` and `liteparse`, pointing to the same script.
 
-## Dependency rules by file type
+- **When `lit` is on PATH**: commands are `lit parse`, `lit batch-parse`, `lit screenshot`.
+- **When only `npm` / `npx` is available**: the `lit` prefix is dropped — `npx -y @llamaindex/liteparse parse`, `npx -y @llamaindex/liteparse batch-parse`, `npx -y @llamaindex/liteparse screenshot`.
+- **When neither is available**: Node.js 18+ and npm are required.
 
-- **PDFs** work out of the box. Nothing else needed.
-- **DOCX, XLSX, PPTX, ODT, RTF, CSV, TSV, Pages, Numbers, Key**: LiteParse converts them via LibreOffice. Verify `libreoffice` is on PATH before running: `which libreoffice`.
-- **PNG, JPG, TIFF, WebP, GIF, BMP, SVG**: converted via ImageMagick. Verify `magick` or `convert` is on PATH: `which magick || which convert`.
-- If a required tool is missing, report the exact missing binary name. Do not guess.
+## File-type dependencies
+
+| Input type | Extra dependency | Binary to check |
+|---|---|---|
+| PDF | None | — |
+| DOC, DOCX, DOCM, ODT, RTF, PPT, PPTX, PPTM, ODP, XLS, XLSX, XLSM, ODS, CSV, TSV | LibreOffice | `libreoffice` |
+| JPG, JPEG, PNG, GIF, BMP, TIFF, WebP, SVG | ImageMagick | `magick` or `convert` |
 
 ## Supported flags (upstream CLI, v1.4.x)
 
@@ -47,12 +39,12 @@ LiteParse is a local, no-cloud document parser. This skill is background knowled
 - `--preserve-small-text`
 - `--password <pw>` for encrypted PDFs
 - `--config <file>` JSON config
-- `--recursive` (batch-parse)
-- `--extension ".pdf"` (batch-parse)
+- `--recursive` (batch-parse only)
+- `--extension ".pdf"` (batch-parse only)
 - `-q, --quiet`
 
 **`screenshot`:**
-- `-o, --output-dir <dir>` (default `./screenshots`) — **always pass the output via `-o`**
+- `-o, --output-dir <dir>` (default `./screenshots`) — output directory is passed via `-o`, not positionally
 - `--target-pages "1,3,5"` or `"1-5"`
 - `--dpi <n>`
 - `--format png|jpg` (default `png`)
@@ -62,12 +54,55 @@ LiteParse is a local, no-cloud document parser. This skill is background knowled
 
 ## Config file
 
-A sample config ships with this plugin at [`examples/liteparse.config.json`](../../examples/liteparse.config.json). Point any of the three commands at it with `--config <file>` when the user wants consistent defaults (OCR language, DPI, max pages, etc.).
+A sample config ships with this plugin at [`examples/liteparse.config.json`](../../examples/liteparse.config.json). Any command accepts `--config <file>` to load consistent defaults (OCR language, DPI, max pages, output format, etc.).
 
-## Failure handling
+## Post-parse hooks
 
-- Missing `lit` and missing `npm` → Node.js 18+ and npm are required.
-- Missing `libreoffice` for Office input → install LibreOffice.
-- Missing `magick`/`convert` for image input → install ImageMagick.
-- Unreachable `--ocr-server-url` → surface the failing URL and suggest dropping the flag to fall back to built-in Tesseract.
-- Password-protected PDF without `--password` → surface the CLI's error verbatim.
+The config file supports a `hooks` object that defines shell commands to run automatically after successful operations. Each hook type is an array of shell command strings.
+
+### Hook types
+
+| Hook | Trigger | Template variables |
+|------|---------|-------------------|
+| `postParse` | After a single file parse completes | `{{file}}` (input path), `{{output}}` (output path) |
+| `postBatchParse` | After a batch parse completes | `{{inputDir}}`, `{{outputDir}}` |
+| `postScreenshot` | After screenshots are generated | `{{file}}` (input PDF), `{{outputDir}}` (screenshot dir) |
+| `postConvert` | After a format conversion completes | `{{file}}` (input path), `{{output}}` (output path) |
+
+### Example config with hooks
+
+```json
+{
+  "ocrLanguage": "en",
+  "dpi": 150,
+  "outputFormat": "json",
+  "hooks": {
+    "postParse": [
+      "echo 'Parsed: {{file}} -> {{output}}'",
+      "git add '{{output}}'"
+    ],
+    "postBatchParse": [
+      "curl -X POST https://api.example.com/notify -d '{\"dir\": \"{{outputDir}}\"}'"
+    ]
+  }
+}
+```
+
+### How to execute hooks
+
+1. After a successful parse/batch/screenshot/convert, check if a `liteparse.config.json` exists (passed via `--config` or in the project root).
+2. Read the `hooks` object and find the matching hook array for the completed operation.
+3. For each command, substitute `{{...}}` template variables with actual paths, then run via `bash -c`.
+4. Report hook results after the main operation report.
+5. If a hook fails, report the error but do **not** roll back the parse output.
+6. Show the user which hook commands will run before executing them for the first time in a session.
+
+## Known failure modes
+
+| Symptom | Cause |
+|---|---|
+| `lit` not found and `npm` not found | Node.js 18+ and npm are not installed |
+| LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
+| ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
+| OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |
+| Password-protected PDF fails | `--password <pw>` was not provided |

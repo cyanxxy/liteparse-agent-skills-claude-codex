@@ -13,13 +13,14 @@ Parse a single file at `$0` with LiteParse, applying any additional flags from `
 
 1. **Resolve `$0`** relative to the project root. If it is missing or ambiguous, ask the user for the correct path. If the user passed no arguments at all, ask for a file path.
 2. **Check file-type dependencies**:
-   - Office files (`.docx` `.xlsx` `.pptx` `.odt` `.rtf` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
-   - Image files (`.png` `.jpg` `.jpeg` `.tif` `.tiff` `.webp` `.gif` `.bmp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
+   - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
+   - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
    - PDFs: no extra dependency.
 3. **Choose the CLI**: run `which lit`. If it succeeds, use `lit parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
 4. **Run the parse** with the user's flags from `$ARGUMENTS`. Respect any of: `--format json|text`, `-o <file>`, `--target-pages "1-5"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--password <pw>`, `--config <file>`, `-q`.
-5. **Default output placement**: if the user asked for JSON and did not pass `-o`, write next to the source file with a `.liteparse.json` suffix and report the path.
-6. **Report**:
+5. **Default output**: if the user did not pass `-o`, the CLI writes to stdout. Show a preview of the output. If the output is large, suggest rerunning with `-o <file>` to write to a file.
+6. **Post-parse hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postParse`, execute each command in the array after a successful parse. Substitute `{{file}}` with the input path and `{{output}}` with the output path before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the parse output. Show the user what hooks will run before first execution.
+7. **Report**:
    - the exact file parsed,
    - key flags used,
    - output path if written to a file, otherwise a preview of stdout,

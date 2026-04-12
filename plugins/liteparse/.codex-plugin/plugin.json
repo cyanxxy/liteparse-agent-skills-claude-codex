@@ -6,7 +6,7 @@
     "name": "Local Workspace"
   },
   "homepage": "https://developers.llamaindex.ai/liteparse/",
-  "repository": "https://github.com/cyanxxy/liteparse-claude-codexplugin",
+  "repository": "https://github.com/cyanxxy/liteparse-agent-skills-claude-codex",
   "license": "Apache-2.0",
   "keywords": [
     "liteparse",
