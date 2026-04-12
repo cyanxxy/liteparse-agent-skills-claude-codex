@@ -1,0 +1,48 @@
+# === OS ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+._*
+
+# === Editors ===
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# === Claude Code local settings ===
+# settings.local.json is machine-specific (absolute paths, session permissions).
+# Shared project settings (settings.json, CLAUDE.md) should be committed.
+.claude/settings.local.json
+
+# === Vendored reference repos ===
+# These are cloned upstream repos used during development, not part of the plugin.
+# Each has its own .git/ and should not be nested inside this repo.
+liteparse-upstream/
+claude-plugin-marketplace/
+
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+.pnp.*
+
+# === LiteParse output artifacts (from testing) ===
+*.liteparse.json
+*-liteparse-output/
+*-screenshots/
+screenshots/
+
+# === Environment / secrets ===
+.env
+.env.*
+!.env.example
+
+# === Logs ===
+*.log

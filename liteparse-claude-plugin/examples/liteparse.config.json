@@ -1,0 +1,8 @@
+{
+  "ocrLanguage": "en",
+  "ocrEnabled": true,
+  "maxPages": 1000,
+  "dpi": 150,
+  "outputFormat": "json",
+  "preserveVerySmallText": false
+}

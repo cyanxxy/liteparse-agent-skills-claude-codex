@@ -1,0 +1,16 @@
+{
+  "name": "local-liteparse",
+  "owner": {
+    "name": "Local Workspace"
+  },
+  "metadata": {
+    "description": "Local marketplace hosting the LiteParse plugin for Claude Code and Cowork: local document parsing, OCR, and PDF page screenshots with no cloud dependencies."
+  },
+  "plugins": [
+    {
+      "name": "liteparse",
+      "source": "./liteparse-claude-plugin",
+      "description": "Parse PDFs, Office files, and images locally with LiteParse. Extract text or JSON, run OCR, and generate page screenshots without cloud dependencies."
+    }
+  ]
+}
