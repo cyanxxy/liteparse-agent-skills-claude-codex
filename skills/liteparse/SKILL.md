@@ -1,7 +1,7 @@
 ---
 name: liteparse
 description: Use this skill when the user asks to parse, convert, compare, merge, or extract data from unstructured files (PDF, DOCX, PPTX, XLSX, images, etc.) locally without cloud dependencies.
-compatibility: Requires Node 18+ and `@llamaindex/liteparse` installed globally via npm (`npm i -g @llamaindex/liteparse`). LibreOffice for Office files. ImageMagick for images.
+compatibility: Requires Node 20.11+ and `@llamaindex/liteparse` installed globally via npm (`npm i -g @llamaindex/liteparse`). LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:
   author: Local Workspace

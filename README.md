@@ -138,7 +138,8 @@ Hooks run via `bash -c` with template variables substituted. Failed hooks are re
 
 ## Requirements
 
-- Node.js 18+ and `npm` (for the `npx` fallback)
+- Node.js 20.11+ and `npm` (for the `npx` fallback)
+- Python 3.12+ for the Python SDK and OCR server packages
 - Optional: `lit` installed globally (`npm i -g @llamaindex/liteparse`)
 - Optional: LibreOffice (for Office formats and `/liteparse:convert-format`)
 - Optional: ImageMagick (for image inputs)

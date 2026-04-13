@@ -13,7 +13,7 @@ LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are reg
 
 - **When `lit` is on PATH**: commands are `lit parse`, `lit batch-parse`, `lit screenshot`.
 - **When only `npm` / `npx` is available**: the `lit` prefix is dropped — `npx -y @llamaindex/liteparse parse`, `npx -y @llamaindex/liteparse batch-parse`, `npx -y @llamaindex/liteparse screenshot`.
-- **When neither is available**: Node.js 18+ and npm are required.
+- **When neither is available**: Node.js 20.11+ and npm are required.
 
 ## File-type dependencies
 
@@ -101,7 +101,7 @@ The config file supports a `hooks` object that defines shell commands to run aut
 
 | Symptom | Cause |
 |---|---|
-| `lit` not found and `npm` not found | Node.js 18+ and npm are not installed |
+| `lit` not found and `npm` not found | Node.js 20.11+ and npm are not installed |
 | LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
 | ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
 | OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |

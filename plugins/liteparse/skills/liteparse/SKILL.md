@@ -17,7 +17,7 @@ Local document parsing with no cloud dependency. Handles PDFs, Office files, ima
    npx -y @llamaindex/liteparse batch-parse ./in ./out --recursive
    npx -y @llamaindex/liteparse screenshot file.pdf -o ./out --target-pages "1-3"
    ```
-4. If `npm` is also missing, tell the user Node.js 18+ and npm are required.
+4. If `npm` is also missing, tell the user Node.js 20.11+ and npm are required.
 
 ## Dependency rules by file type
 
@@ -69,7 +69,7 @@ lit screenshot document.pdf -o ./screenshots --format jpg
 
 ## Failure handling
 
-- Missing `lit` and `npm` → Node.js 18+ and npm are required.
+- Missing `lit` and `npm` → Node.js 20.11+ and npm are required.
 - Missing LibreOffice for Office input → ask the user to install LibreOffice.
 - Missing ImageMagick for image input → ask the user to install ImageMagick (`magick` or `convert`).
 - Unreachable `--ocr-server-url` → surface the URL and suggest dropping the flag to use built-in Tesseract.
