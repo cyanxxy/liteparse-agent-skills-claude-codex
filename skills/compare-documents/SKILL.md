@@ -14,24 +14,49 @@ Parse two documents with LiteParse and diff their text content.
 
 ## Steps
 
-1. **Resolve two file paths**. Both required. If fewer than two, ask.
-2. **Check file-type dependencies** for each file (LibreOffice for Office, ImageMagick for images).
-3. **Choose the CLI**: `which lit` → `lit parse`, otherwise `npx -y @llamaindex/liteparse parse`.
-4. **Parse both files** to text:
+1. **Resolve the two file paths** relative to the project root. Both are required. If fewer than two paths were provided, ask for both file paths.
+
+2. **Check file-type dependencies** for each file:
+   - Office files: verify `which libreoffice`.
+   - Image files: verify `which magick || which convert`.
+   - PDFs: no extra dependency.
+   Stop and report if a required tool is missing.
+
+3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
+
+4. **Parse both files** to text. Run two parse commands:
    ```bash
    <cli> parse <file-a> --format text -o /tmp/liteparse-compare-a.txt
    <cli> parse <file-b> --format text -o /tmp/liteparse-compare-b.txt
    ```
-5. **Diff**: `diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt`. If no differences, report identical.
-6. **Summarize**: sections added/removed/modified, key content changes (numbers, names, dates), scale of change.
-7. **Optional output**: if `-o <path>` given, write the unified diff there.
-8. **Clean up** temp files.
-9. **Report**: files compared, whether they differ, diff + summary or output path, parse errors verbatim.
+
+5. **Diff the parsed text**:
+   ```bash
+   diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
+   ```
+   If `diff` reports no differences, tell the user the documents are textually identical.
+
+6. **Produce a summary**. After showing the raw diff, provide a concise human-readable summary:
+   - Sections added, removed, or modified
+   - Key content changes (numbers, names, dates, clauses)
+   - Approximate scale of change (minor edits vs. major rewrite)
+
+7. **Optional output file**. If the user passed `-o <path>` as an additional flag, write the unified diff to that path and report it.
+
+8. **Clean up** the temp files.
+
+9. **Report**:
+   - The two files compared
+   - Whether they differ or are identical
+   - The diff and summary (or output path if written to file)
+   - Any parse errors verbatim
 
 ## Examples
 
 ```bash
-/compare-documents ./contracts/v1.pdf ./contracts/v2.pdf
-/compare-documents ./resume-old.docx ./resume-new.docx -o changes.diff
-/compare-documents ./spec-draft.pdf ./spec-final.pdf
+lit parse ./contracts/v1.pdf --format text -o /tmp/liteparse-compare-a.txt && lit parse ./contracts/v2.pdf --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
+lit parse ./resume-old.docx --format text -o /tmp/liteparse-compare-a.txt && lit parse ./resume-new.docx --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt > changes.diff
+lit parse ./spec-draft.pdf --format text -o /tmp/liteparse-compare-a.txt && lit parse ./spec-final.pdf --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
 ```
+
+For CLI flag details and dependency rules, see the background `liteparse` skill.

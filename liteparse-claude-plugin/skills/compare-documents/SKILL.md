@@ -55,3 +55,5 @@ Parse two documents with LiteParse and diff their text content.
 /liteparse:compare-documents ./resume-old.docx ./resume-new.docx -o changes.diff
 /liteparse:compare-documents ./spec-draft.pdf ./spec-final.pdf
 ```
+
+For CLI flag details and dependency rules, see the background `liteparse` skill.

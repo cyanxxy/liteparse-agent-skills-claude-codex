@@ -1,8 +1,6 @@
 ---
 name: extract-tables
 description: Extract tables from a PDF, DOCX, XLSX, or PPTX file and output them as CSV or structured JSON. Use when pulling tabular data from documents for analysis, import, or downstream processing.
-argument-hint: "<file> [--csv | --json] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(libreoffice *) Bash(magick *) Bash(convert *) Bash(mkdir *)
 ---
 
 # Extract Tables
@@ -11,7 +9,7 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
 
 ## Steps
 
-1. **Resolve `$0`** as the input file path. If no arguments were passed, ask for a file.
+1. **Resolve the input file path**. If no file was provided, ask for one.
 
 2. **Check file-type dependencies**:
    - Office files: verify `which libreoffice`.
@@ -30,7 +28,7 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
    - Detecting grid-like structures with consistent row/column patterns in text blocks
    - Grouping adjacent text items that share aligned x-coordinates (columns) and sequential y-coordinates (rows)
 
-6. **Determine output format** from `$ARGUMENTS`:
+6. **Determine output format** from the additional flags:
    - `--csv` (default if not specified): write each table as a separate CSV file
    - `--json`: write all tables as a JSON array of objects with headers as keys
 
@@ -50,11 +48,11 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
 
 ## Examples
 
-```
-/liteparse:extract-tables ./report.pdf
-/liteparse:extract-tables ./financials.xlsx --csv -o ./tables/
-/liteparse:extract-tables ./invoice.pdf --json -o invoice-tables.json
-/liteparse:extract-tables ./scan.pdf --csv --target-pages "1-3"
+```bash
+lit parse ./report.pdf --format json -o /tmp/liteparse-tables-raw.json   # then extract tables (CSV default)
+lit parse ./financials.xlsx --format json -o /tmp/liteparse-tables-raw.json   # then extract -> ./tables/
+lit parse ./invoice.pdf --format json -o /tmp/liteparse-tables-raw.json   # then extract as JSON -> invoice-tables.json
+lit parse ./scan.pdf --format json --target-pages "1-3" -o /tmp/liteparse-tables-raw.json   # then extract tables as CSV
 ```
 
 ## Notes

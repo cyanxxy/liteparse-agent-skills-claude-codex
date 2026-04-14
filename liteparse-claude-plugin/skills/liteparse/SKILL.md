@@ -5,7 +5,7 @@ description: Background knowledge for running LiteParse: choosing between instal
 
 # LiteParse Reference
 
-LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills `/liteparse:parse-document`, `/liteparse:batch-parse`, `/liteparse:screenshot-document`, and `/liteparse:extract-structured`. Do not execute steps from this skill directly; defer to whichever action skill is active.
+LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills `/liteparse:parse-document`, `/liteparse:batch-parse`, `/liteparse:screenshot-document`, `/liteparse:extract-structured`, `/liteparse:extract-tables`, `/liteparse:compare-documents`, `/liteparse:convert-format`, and `/liteparse:merge-parsed`. Do not execute steps from this skill directly; defer to whichever action skill is active.
 
 ## CLI availability
 
@@ -13,7 +13,29 @@ LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are reg
 
 - **When `lit` is on PATH**: commands are `lit parse`, `lit batch-parse`, `lit screenshot`.
 - **When only `npm` / `npx` is available**: the `lit` prefix is dropped — `npx -y @llamaindex/liteparse parse`, `npx -y @llamaindex/liteparse batch-parse`, `npx -y @llamaindex/liteparse screenshot`.
-- **When neither is available**: Node.js 20.11+ and npm are required.
+- **When neither is available**: Node.js 20.11+ and npm are required. Install with `npm i -g @llamaindex/liteparse`, then verify with `lit --version`.
+
+### Installing extra dependencies
+
+For Office document support (DOCX, PPTX, XLSX), LibreOffice is required:
+
+```bash
+# macOS
+brew install --cask libreoffice
+
+# Ubuntu/Debian
+apt-get install libreoffice
+```
+
+For image parsing, ImageMagick is required:
+
+```bash
+# macOS
+brew install imagemagick
+
+# Ubuntu/Debian
+apt-get install imagemagick
+```
 
 ## File-type dependencies
 
@@ -35,8 +57,8 @@ LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are reg
 - `--max-pages <n>` (default 10000)
 - `--target-pages "1-5,10"` (parse only)
 - `--dpi <n>` (default 150)
-- `--no-precise-bbox`
-- `--preserve-small-text`
+- `--no-precise-bbox` (faster; drops precise bounding boxes)
+- `--preserve-small-text` (keeps very small text that would otherwise be dropped)
 - `--password <pw>` for encrypted PDFs
 - `--config <file>` JSON config
 - `--recursive` (batch-parse only)
@@ -52,9 +74,56 @@ LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are reg
 - `--config <file>`
 - `-q, --quiet`
 
+### Key options reference
+
+#### OCR options
+
+| Option | Description |
+|--------|-------------|
+| (default) | Tesseract.js — zero setup, built-in |
+| `--ocr-language fra` | Set OCR language (ISO code) |
+| `--ocr-server-url <url>` | Use external HTTP OCR server |
+| `--no-ocr` | Disable OCR entirely |
+
+#### Output options
+
+| Option | Description |
+|--------|-------------|
+| `--format json` | Structured JSON with bounding boxes |
+| `--format text` | Plain text (default) |
+| `-o <file>` | Save output to file |
+
+#### Performance / quality options
+
+| Option | Description |
+|--------|-------------|
+| `--dpi <n>` | Rendering DPI (default: 150; use 300 for high quality) |
+| `--max-pages <n>` | Limit pages parsed |
+| `--target-pages <pages>` | Parse specific pages (e.g. `"1-5,10"`) |
+| `--no-precise-bbox` | Disable precise bounding boxes (faster) |
+| `--preserve-small-text` | Keep very small text that would otherwise be dropped |
+
 ## Config file
 
 A sample config ships with this plugin at [`examples/liteparse.config.json`](../../examples/liteparse.config.json). Any command accepts `--config <file>` to load consistent defaults (OCR language, DPI, max pages, output format, etc.).
+
+Example:
+
+```json
+{
+  "ocrLanguage": "en",
+  "ocrEnabled": true,
+  "maxPages": 1000,
+  "dpi": 150,
+  "outputFormat": "json",
+  "preserveVerySmallText": false,
+  "hooks": {
+    "postParse": [
+      "echo 'Parsed: {{file}} -> {{output}}'"
+    ]
+  }
+}
+```
 
 ## Structured extraction recipes
 
@@ -109,6 +178,34 @@ The config file supports a `hooks` object that defines shell commands to run aut
 ### Hook safety
 
 Template variables are substituted as raw strings into a shell command before `bash -c` runs it. Users must single-quote every `{{...}}` placeholder in their hook templates (e.g. `'{{file}}'`, `'{{outputDir}}'`) so that filenames containing spaces, quotes, or shell metacharacters do not break the command or inject arbitrary shell. When reviewing or suggesting hook config, flag any `{{...}}` that is not single-quoted as a shell-injection risk.
+
+## HTTP OCR server API (advanced)
+
+If the user wants to plug in a custom OCR backend, the server must implement:
+
+- **Endpoint**: `POST /ocr`
+- **Accepts**: `file` (multipart) and `language` (string) parameters
+- **Returns**:
+
+```json
+{
+  "results": [
+    { "text": "Hello", "bbox": [x1, y1, x2, y2], "confidence": 0.98 }
+  ]
+}
+```
+
+## Supported input formats
+
+| Category | Formats |
+|----------|---------|
+| PDF | `.pdf` |
+| Word | `.doc`, `.docx`, `.docm`, `.odt`, `.rtf` |
+| PowerPoint | `.ppt`, `.pptx`, `.pptm`, `.odp` |
+| Spreadsheets | `.xls`, `.xlsx`, `.xlsm`, `.ods`, `.csv`, `.tsv` |
+| Images | `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.tiff`, `.webp`, `.svg` |
+
+Office documents require LibreOffice; images require ImageMagick. LiteParse auto-converts these formats to PDF before parsing.
 
 ## Known failure modes
 

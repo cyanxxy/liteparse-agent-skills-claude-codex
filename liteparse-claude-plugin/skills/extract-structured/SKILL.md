@@ -1,6 +1,6 @@
 ---
 name: extract-structured
-description: Extract user-defined fields (invoice numbers, dates, totals, parties, line items, etc.) from PDFs, Office docs, and images into repeatable structured JSON, JSONL, or CSV. Use whenever the user wants specific named fields pulled from a document — whether listed inline, loaded from a saved schema, or saved as a new reusable extraction contract — even if they don't explicitly say "structured extraction".
+description: Extract user-defined fields (invoice numbers, dates, totals, parties, line items, etc.) from PDFs, Office docs, and images into repeatable structured JSON, JSONL, or CSV. Use whenever specific named fields must be pulled from a document, inline or via a saved schema.
 argument-hint: "<file> [--fields \"<field list/spec>\"] [--schema <file>] [--save-schema <file>] [--json|--jsonl|--csv] [-o output]"
 allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---

@@ -1,8 +1,6 @@
 ---
 name: compare-documents
 description: Parse two documents and produce a structured diff showing what changed between them. Use for comparing contract versions, resume revisions, spec updates, or any two documents.
-argument-hint: "<file-a> <file-b>"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(diff *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---
 
 # Compare Documents
@@ -11,7 +9,7 @@ Parse two documents with LiteParse and diff their text content.
 
 ## Steps
 
-1. **Resolve `$0` and `$1`** as file paths relative to the project root. Both are required. If fewer than two arguments were passed, ask for both file paths.
+1. **Resolve the two file paths** relative to the project root. Both are required. If fewer than two paths were provided, ask for both file paths.
 
 2. **Check file-type dependencies** for each file:
    - Office files: verify `which libreoffice`.
@@ -38,7 +36,7 @@ Parse two documents with LiteParse and diff their text content.
    - Key content changes (numbers, names, dates, clauses)
    - Approximate scale of change (minor edits vs. major rewrite)
 
-7. **Optional output file**. If the user passed `-o <path>` in `$ARGUMENTS`, write the unified diff to that path and report it.
+7. **Optional output file**. If the user passed `-o <path>` as an additional flag, write the unified diff to that path and report it.
 
 8. **Clean up** the temp files.
 
@@ -50,8 +48,10 @@ Parse two documents with LiteParse and diff their text content.
 
 ## Examples
 
+```bash
+lit parse ./contracts/v1.pdf --format text -o /tmp/liteparse-compare-a.txt && lit parse ./contracts/v2.pdf --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
+lit parse ./resume-old.docx --format text -o /tmp/liteparse-compare-a.txt && lit parse ./resume-new.docx --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt > changes.diff
+lit parse ./spec-draft.pdf --format text -o /tmp/liteparse-compare-a.txt && lit parse ./spec-final.pdf --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
 ```
-/liteparse:compare-documents ./contracts/v1.pdf ./contracts/v2.pdf
-/liteparse:compare-documents ./resume-old.docx ./resume-new.docx -o changes.diff
-/liteparse:compare-documents ./spec-draft.pdf ./spec-final.pdf
-```
+
+For CLI flag details and dependency rules, see the background `liteparse` skill.

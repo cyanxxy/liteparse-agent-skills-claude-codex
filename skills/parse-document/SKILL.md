@@ -10,20 +10,26 @@ metadata:
 
 # Parse Document
 
-Parse a single file with LiteParse.
+Parse a single file with LiteParse, applying any additional flags the user supplies.
 
 ## Steps
 
-1. **Resolve the file path**. If missing or ambiguous, ask the user.
+1. **Resolve the file path** relative to the project root. If it is missing or ambiguous, ask the user for the correct path. If the user passed no arguments at all, ask for a file path.
 2. **Check file-type dependencies**:
-   - Office files (`.docx` `.xlsx` `.pptx` `.odt` `.rtf` `.csv` `.tsv`): run `which libreoffice`. If absent, stop.
-   - Image files (`.png` `.jpg` `.jpeg` `.tif` `.tiff` `.webp` `.gif` `.bmp` `.svg`): run `which magick || which convert`. If absent, stop.
+   - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
+   - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
    - PDFs: no extra dependency.
-3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, `npx -y @llamaindex/liteparse parse`.
-4. **Run the parse** with flags: `--format json|text`, `-o <file>`, `--target-pages`, `--no-ocr`, `--ocr-server-url`, `--ocr-language`, `--dpi`, `--password`, `--config`, `-q`.
-5. **Post-parse hooks**: if a `liteparse.config.json` exists in the project root and defines `hooks.postParse`, execute each hook command after a successful parse, substituting `{{file}}` with the input path and `{{output}}` with the output path.
-6. **Default output placement**: if JSON was requested and no `-o` was given, write next to the source file with a `.liteparse.json` suffix.
-7. **Report**: file parsed, flags used, output path or stdout preview, any errors verbatim.
+3. **Choose the CLI**: run `which lit`. If it succeeds, use `lit parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
+4. **Run the parse** with any additional flags the user provided. Respect any of: `--format json|text`, `-o <file>`, `--target-pages "1-5"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--password <pw>`, `--config <file>`, `-q`.
+5. **Default output placement**:
+   - If the user did not pass `-o`, the CLI writes to stdout. Show a preview of the output. If the output is large, suggest rerunning with `-o <file>` to write to a file.
+   - When JSON was requested and no `-o` was given, prefer writing next to the source file with a `.liteparse.json` suffix.
+6. **Post-parse hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postParse`, execute each command in the array after a successful parse. Substitute `{{file}}` with the input path and `{{output}}` with the output path before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the parse output. Show the user what hooks will run before first execution.
+7. **Report**:
+   - the exact file parsed,
+   - key flags used,
+   - output path if written to a file, otherwise a preview of stdout,
+   - any dependency error or non-zero exit verbatim (do not paraphrase).
 
 ## Examples
 
@@ -33,3 +39,5 @@ lit parse ./contracts/master.docx --no-ocr
 lit parse ./scans/invoice.pdf --ocr-server-url http://localhost:5000/ocr --target-pages "1-2"
 lit parse ./slides.pptx --format text -o slides.txt
 ```
+
+For details on CLI flags and dependency rules, see the background `liteparse` skill.

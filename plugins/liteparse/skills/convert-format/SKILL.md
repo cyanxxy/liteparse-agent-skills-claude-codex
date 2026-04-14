@@ -1,8 +1,6 @@
 ---
 name: convert-format
 description: Convert documents between formats using LibreOffice (e.g., DOCX to PDF, PPTX to PDF, ODT to DOCX). Use when you need format conversion without parsing or text extraction.
-argument-hint: "<file> --to <format> [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(libreoffice *) Bash(mkdir *) Bash(ls *) Bash(mv *)
 ---
 
 # Convert Format
@@ -11,9 +9,9 @@ Convert a document from one format to another using LibreOffice's headless conve
 
 ## Steps
 
-1. **Resolve `$0`** as the input file path. If no arguments were passed, ask for a file.
+1. **Resolve the input file path**. If no file was provided, ask for one.
 
-2. **Parse `--to <format>`** from `$ARGUMENTS`. Supported target formats:
+2. **Parse `--to <format>`** from the additional flags. Supported target formats:
    - `pdf` — from DOCX, XLSX, PPTX, ODT, ODS, ODP, RTF, CSV, HTML
    - `docx` — from ODT, RTF, PDF (limited), HTML
    - `xlsx` — from ODS, CSV, TSV
@@ -52,16 +50,16 @@ Convert a document from one format to another using LibreOffice's headless conve
 
 ## Examples
 
-```
-/liteparse:convert-format ./report.docx --to pdf
-/liteparse:convert-format ./data.csv --to xlsx -o spreadsheet.xlsx
-/liteparse:convert-format ./slides.pptx --to pdf -o ./exports/slides.pdf
-/liteparse:convert-format ./legacy.odt --to docx
-/liteparse:convert-format ./invoice.html --to pdf
+```bash
+libreoffice --headless --convert-to pdf --outdir . "./report.docx"
+libreoffice --headless --convert-to xlsx --outdir . "./data.csv" && mv data.xlsx spreadsheet.xlsx
+libreoffice --headless --convert-to pdf --outdir "./exports" "./slides.pptx"
+libreoffice --headless --convert-to docx --outdir . "./legacy.odt"
+libreoffice --headless --convert-to pdf --outdir . "./invoice.html"
 ```
 
 ## Notes
 
-- This skill does **not** parse or extract text — it converts the file format directly. For text extraction, use `/liteparse:parse-document`.
+- This skill does **not** parse or extract text — it converts the file format directly. For text extraction, use the `parse-document` skill.
 - Conversion quality depends on LibreOffice's support for the input format. Complex formatting (macros, embedded objects, advanced layouts) may not convert perfectly.
 - PDF to DOCX conversion is supported but limited — LibreOffice produces a best-effort editable document from the PDF layout.

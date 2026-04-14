@@ -1,21 +1,19 @@
 ---
 name: batch-parse
 description: Batch parse every supported document in a directory with LiteParse. Use when processing a folder of PDFs or Office files into text or JSON, filtering by file extension, or recursing into nested folders.
-argument-hint: "<input-dir> [output-dir]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(ls *) Bash(mkdir *)
 ---
 
 # Batch Parse
 
-Run LiteParse over every supported file in `$0`, writing results to `$1` (or a sensible default if the user omitted it).
+Run LiteParse over every supported file in an input directory, writing results to an output directory.
 
 ## Steps
 
-1. **Resolve `$0`** (input directory) relative to the project root. If it does not exist, stop and report the missing path. If no arguments were passed, ask for an input directory.
-2. **Resolve `$1`** (output directory). The upstream CLI **requires** both positional directories. If the user omitted the output directory, ask for one before proceeding.
-3. **Parse extra flags from `$ARGUMENTS`**: `--format json|text`, `--recursive`, `--extension ".pdf"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--max-pages <n>`, `--password <pw>`, `--config <file>`, `-q`.
+1. **Resolve the input directory** relative to the project root. If it does not exist, stop and report the missing path. If no arguments were passed, ask for an input directory.
+2. **Resolve the output directory**. The upstream CLI **requires** both positional directories, so always pass both. If the user did not supply an output directory, either default to `<input-dir>-liteparse-output` (and create it with `mkdir -p`) or ask the user — if silently defaulting, mention the chosen path in the report.
+3. **Parse extra flags**: `--format json|text`, `--recursive`, `--extension ".pdf"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--max-pages <n>`, `--password <pw>`, `--config <file>`, `-q`.
 4. **Choose the CLI**: run `which lit`. If it exists, use `lit batch-parse <input-dir> <output-dir> <flags>`. Otherwise, fall back to `npx -y @llamaindex/liteparse batch-parse <input-dir> <output-dir> <flags>` (no `lit` prefix under npx). Both positional directories are **required** by the upstream CLI — always pass both.
-5. **Post-parse hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postBatchParse`, execute each command in the array after a successful batch. Substitute `{{inputDir}}` with the input directory and `{{outputDir}}` with the output directory before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the batch output. Show the user what hooks will run before first execution.
+5. **Post-batch-parse hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postBatchParse`, execute each command in the array after a successful batch. Substitute `{{inputDir}}` with the input directory and `{{outputDir}}` with the output directory before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the batch output. Show the user what hooks will run before first execution.
 6. **Report**:
    - input directory,
    - output directory,
@@ -26,11 +24,10 @@ Run LiteParse over every supported file in `$0`, writing results to `$1` (or a s
 
 ## Examples
 
-```
-/liteparse:batch-parse ./docs
-/liteparse:batch-parse ./docs ./parsed-docs --format json --recursive
-/liteparse:batch-parse ./contracts ./contracts-json --extension ".pdf" --no-ocr
-/liteparse:batch-parse ./scans ./scans-out --ocr-server-url http://localhost:5000/ocr
+```bash
+lit batch-parse ./docs ./parsed-docs --format json --recursive
+lit batch-parse ./contracts ./contracts-json --extension ".pdf" --no-ocr
+lit batch-parse ./scans ./scans-out --ocr-server-url http://localhost:5000/ocr
 ```
 
 For CLI flag details and dependency rules, see the background `liteparse` skill.

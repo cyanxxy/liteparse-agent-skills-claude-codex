@@ -1,8 +1,6 @@
 ---
 name: extract-structured
-description: Extract user-defined fields (invoice numbers, dates, totals, parties, line items, etc.) from PDFs, Office docs, and images into repeatable structured JSON, JSONL, or CSV. Use whenever the user wants specific named fields pulled from a document — whether listed inline, loaded from a saved schema, or saved as a new reusable extraction contract — even if they don't explicitly say "structured extraction".
-argument-hint: "<file> [--fields \"<field list/spec>\"] [--schema <file>] [--save-schema <file>] [--json|--jsonl|--csv] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
+description: Extract user-defined fields (invoice numbers, dates, totals, parties, line items, etc.) from PDFs, Office docs, and images into repeatable structured JSON, JSONL, or CSV. Use whenever specific named fields must be pulled from a document, inline or via a saved schema.
 ---
 
 # Extract Structured
@@ -11,7 +9,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
 
 ## Steps
 
-1. **Resolve `$0`** relative to the project root. If it is missing or ambiguous, ask the user for the correct path. If the user passed no arguments at all, ask for a file path.
+1. **Resolve the file path** relative to the project root. If it is missing or ambiguous, ask the user for the correct path. If the user passed no arguments at all, ask for a file path.
 2. **Check file-type dependencies**:
    - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
    - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
@@ -27,7 +25,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    <cli> parse <file> --format json -o /tmp/liteparse-structured-raw.json
    ```
 6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns. If a field has multiple plausible matches, mark it ambiguous and preserve the evidence. If a field is missing, mark it missing instead of guessing.
-7. **Determine the output format** from `$ARGUMENTS`:
+7. **Determine the output format** from the additional flags:
    - `--json` (default)
    - `--jsonl`
    - `--csv`
@@ -44,7 +42,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
 
 ## Schema file format
 
-Schemas loaded via `--schema` and written via `--save-schema` share the shape shown in [`examples/invoice.extract.json`](../../examples/invoice.extract.json):
+Schemas loaded via `--schema` and written via `--save-schema` share the shape shown in [`invoice.extract.json`](./invoice.extract.json):
 
 ```json
 {
@@ -70,11 +68,11 @@ Schemas loaded via `--schema` and written via `--save-schema` share the shape sh
 
 ## Examples
 
-```
-/liteparse:extract-structured ./invoice.pdf --fields "invoice number, invoice date, total amount"
-/liteparse:extract-structured ./invoice.pdf --schema ./examples/invoice.extract.json --json -o invoice-extracted.json
-/liteparse:extract-structured ./contracts/master.pdf --fields "party name:string, effective date:date, governing law:string" --jsonl
-/liteparse:extract-structured ./receipts/receipt.pdf --fields "merchant name, subtotal, total" --save-schema ./schemas/receipt.extract.json
+```bash
+lit parse ./invoice.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract: invoice number, invoice date, total amount
+lit parse ./invoice.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract using ./examples/invoice.extract.json -> invoice-extracted.json
+lit parse ./contracts/master.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract: party name:string, effective date:date, governing law:string -> JSONL
+lit parse ./receipts/receipt.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract: merchant name, subtotal, total; save schema to ./schemas/receipt.extract.json
 ```
 
 For details on CLI flags and dependency rules, see the background `liteparse` skill.

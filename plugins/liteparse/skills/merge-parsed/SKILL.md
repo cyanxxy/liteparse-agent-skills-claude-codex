@@ -1,8 +1,6 @@
 ---
 name: merge-parsed
 description: Combine parsed output from multiple files into a single unified text or JSON document. Use after batch-parse or multiple parse-document runs when you need one consolidated output.
-argument-hint: "<file1> <file2> [... fileN] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(cat *) Bash(ls *) Bash(mkdir *)
 ---
 
 # Merge Parsed
@@ -11,10 +9,10 @@ Combine the parsed output of multiple documents into a single file.
 
 ## Steps
 
-1. **Resolve inputs from `$ARGUMENTS`**. Inputs can be:
+1. **Resolve inputs**. Inputs can be:
    - Individual files: `file1.txt file2.txt file3.json`
    - A glob pattern: `./parsed/*.json`
-   - A directory produced by `/liteparse:batch-parse`: `./output-dir/`
+   - A directory produced by `batch-parse`: `./output-dir/`
    If no arguments were passed, ask the user what files or directory to merge.
 
 2. **Detect format**. Look at file extensions to determine whether the inputs are text (`.txt`) or JSON (`.json`, `.liteparse.json`). All inputs must share the same format. If mixed, report the conflict and stop.
@@ -48,9 +46,18 @@ Combine the parsed output of multiple documents into a single file.
 
 ## Examples
 
+```bash
+# Merge text outputs
+cat ./parsed-docs/report1.txt ./parsed-docs/report2.txt   # then add separators and write merged-output.txt
+
+# Merge a batch-parse output directory into one JSON
+ls ./batch-output/   # then read each .json file and write ./combined.json
+
+# Merge with glob
+ls ./contracts/*.liteparse.json   # then read each and write all-contracts.json
+
+# Merge a set of text files
+ls ./notes/*.txt   # then concatenate with separators and write merged-notes.txt
 ```
-/liteparse:merge-parsed ./parsed-docs/report1.txt ./parsed-docs/report2.txt
-/liteparse:merge-parsed ./batch-output/ -o ./combined.json
-/liteparse:merge-parsed ./contracts/*.liteparse.json -o all-contracts.json
-/liteparse:merge-parsed ./notes/*.txt -o merged-notes.txt
-```
+
+For details on the parsed output formats this skill consumes, see the background `liteparse` skill.
