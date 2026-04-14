@@ -106,6 +106,10 @@ The config file supports a `hooks` object that defines shell commands to run aut
 5. If a hook fails, report the error but do **not** roll back the parse output.
 6. Show the user which hook commands will run before executing them for the first time in a session.
 
+### Hook safety
+
+Template variables are substituted as raw strings into a shell command before `bash -c` runs it. Users must single-quote every `{{...}}` placeholder in their hook templates (e.g. `'{{file}}'`, `'{{outputDir}}'`) so that filenames containing spaces, quotes, or shell metacharacters do not break the command or inject arbitrary shell. When reviewing or suggesting hook config, flag any `{{...}}` that is not single-quoted as a shell-injection risk.
+
 ## Known failure modes
 
 | Symptom | Cause |
