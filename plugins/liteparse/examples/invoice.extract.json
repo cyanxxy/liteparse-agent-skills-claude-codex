@@ -1,0 +1,69 @@
+{
+  "version": "1.0",
+  "name": "invoice-extraction",
+  "output": {
+    "format": "json",
+    "includeEvidence": true
+  },
+  "fields": [
+    {
+      "name": "invoice_number",
+      "label": "Invoice Number",
+      "type": "string",
+      "required": true,
+      "multiple": false,
+      "description": "Unique invoice identifier shown on the document",
+      "examples": [
+        "INV-1042"
+      ]
+    },
+    {
+      "name": "invoice_date",
+      "label": "Invoice Date",
+      "type": "date",
+      "required": true,
+      "multiple": false,
+      "description": "Invoice issue date",
+      "examples": [
+        "2026-04-14"
+      ]
+    },
+    {
+      "name": "vendor_name",
+      "label": "Vendor Name",
+      "type": "string",
+      "required": true,
+      "multiple": false,
+      "description": "Business or entity that issued the invoice"
+    },
+    {
+      "name": "subtotal",
+      "label": "Subtotal",
+      "type": "number",
+      "required": false,
+      "multiple": false,
+      "description": "Amount before taxes, fees, or discounts"
+    },
+    {
+      "name": "total_amount",
+      "label": "Total Amount",
+      "type": "number",
+      "required": true,
+      "multiple": false,
+      "description": "Final amount due"
+    },
+    {
+      "name": "currency",
+      "label": "Currency",
+      "type": "string",
+      "required": false,
+      "multiple": false,
+      "description": "Currency code or symbol shown on the invoice",
+      "enumValues": [
+        "USD",
+        "EUR",
+        "GBP"
+      ]
+    }
+  ]
+}

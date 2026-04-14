@@ -4,5 +4,20 @@
   "maxPages": 1000,
   "dpi": 150,
   "outputFormat": "json",
-  "preserveVerySmallText": false
+  "preserveVerySmallText": false,
+
+  "hooks": {
+    "postParse": [
+      "echo 'Parsed: {{file}} -> {{output}}'"
+    ],
+    "postBatchParse": [
+      "echo 'Batch complete: {{inputDir}} -> {{outputDir}}'"
+    ],
+    "postScreenshot": [
+      "echo 'Screenshots saved to {{outputDir}}'"
+    ],
+    "postConvert": [
+      "echo 'Converted: {{file}} -> {{output}}'"
+    ]
+  }
 }

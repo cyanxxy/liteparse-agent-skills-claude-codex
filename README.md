@@ -26,6 +26,7 @@ Everything runs locally — no cloud dependency.
 | `/liteparse:merge-parsed <files...> [-o output]` | Combine parsed outputs from multiple files into one document |
 | `/liteparse:compare-documents <file-a> <file-b> [-o diff]` | Parse two documents and produce a structured diff with summary |
 | `/liteparse:extract-tables <file> [--csv\|--json] [-o output]` | Extract tables from documents into CSV or structured JSON |
+| `/liteparse:extract-structured <file> [--fields ... \| --schema ...] [--json\|--jsonl\|--csv] [-o output]` | Extract user-defined fields into repeatable structured output |
 | `/liteparse:convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
 
 The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook execution instructions.
@@ -46,14 +47,28 @@ The background `liteparse` skill loads automatically and provides CLI reference,
 │   │   ├── merge-parsed/SKILL.md           # /liteparse:merge-parsed
 │   │   ├── compare-documents/SKILL.md      # /liteparse:compare-documents
 │   │   ├── extract-tables/SKILL.md         # /liteparse:extract-tables
+│   │   ├── extract-structured/SKILL.md     # /liteparse:extract-structured
 │   │   └── convert-format/SKILL.md         # /liteparse:convert-format
-│   ├── examples/liteparse.config.json
+│   ├── examples/
+│   │   ├── liteparse.config.json
+│   │   └── invoice.extract.json
 │   ├── LICENSE
 │   └── README.md
 ├── plugins/liteparse/                       # Codex plugin
 │   ├── .codex-plugin/plugin.json
-│   ├── skills/liteparse/SKILL.md
-│   ├── examples/liteparse.config.json
+│   ├── skills/
+│   │   ├── liteparse/SKILL.md
+│   │   ├── parse-document/SKILL.md
+│   │   ├── batch-parse/SKILL.md
+│   │   ├── screenshot-document/SKILL.md
+│   │   ├── merge-parsed/SKILL.md
+│   │   ├── compare-documents/SKILL.md
+│   │   ├── extract-tables/SKILL.md
+│   │   ├── extract-structured/SKILL.md
+│   │   └── convert-format/SKILL.md
+│   ├── examples/
+│   │   ├── liteparse.config.json
+│   │   └── invoice.extract.json
 │   ├── LICENSE
 │   └── README.md
 └── skills/                                  # Vercel Skills (41+ agents)
@@ -65,6 +80,7 @@ The background `liteparse` skill loads automatically and provides CLI reference,
     ├── merge-parsed/SKILL.md
     ├── compare-documents/SKILL.md
     ├── extract-tables/SKILL.md
+    ├── extract-structured/SKILL.md
     └── convert-format/SKILL.md
 ```
 
@@ -97,6 +113,7 @@ Or install a specific skill:
 ```bash
 npx skills add cyanxxy/liteparse-agent-skills-claude-codex --skill parse-document
 npx skills add cyanxxy/liteparse-agent-skills-claude-codex --skill extract-tables
+npx skills add cyanxxy/liteparse-agent-skills-claude-codex --skill extract-structured
 npx skills add cyanxxy/liteparse-agent-skills-claude-codex --skill compare-documents
 ```
 
@@ -134,7 +151,7 @@ Define shell commands in `liteparse.config.json` that run automatically after op
 | `postScreenshot` | After screenshot generation | `{{file}}`, `{{outputDir}}` |
 | `postConvert` | After format conversion | `{{file}}`, `{{output}}` |
 
-Hooks run via `bash -c` with template variables substituted. Failed hooks are reported but don't roll back the operation.
+Hooks run via `bash -c` with `{{...}}` template variables substituted as raw strings before execution. **Always single-quote template variables** in your hook commands (e.g. `'{{file}}'`, `'{{outputDir}}'`) — otherwise a filename containing spaces, quotes, or shell metacharacters will break the command or, if the source paths are attacker-controlled, inject arbitrary shell commands. All examples above follow this rule. Failed hooks are reported but don't roll back the operation.
 
 ## Requirements
 
