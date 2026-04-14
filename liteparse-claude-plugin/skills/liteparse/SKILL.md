@@ -5,7 +5,7 @@ description: Background knowledge for running LiteParse: choosing between instal
 
 # LiteParse Reference
 
-LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills `/liteparse:parse-document`, `/liteparse:batch-parse`, and `/liteparse:screenshot-document`. Do not execute steps from this skill directly; defer to whichever action skill is active.
+LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills `/liteparse:parse-document`, `/liteparse:batch-parse`, `/liteparse:screenshot-document`, and `/liteparse:extract-structured`. Do not execute steps from this skill directly; defer to whichever action skill is active.
 
 ## CLI availability
 
@@ -55,6 +55,15 @@ LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are reg
 ## Config file
 
 A sample config ships with this plugin at [`examples/liteparse.config.json`](../../examples/liteparse.config.json). Any command accepts `--config <file>` to load consistent defaults (OCR language, DPI, max pages, output format, etc.).
+
+## Structured extraction recipes
+
+`/liteparse:extract-structured` is an agent-facing recipe workflow, not a new upstream `lit` subcommand. It starts from `lit parse <file> --format json` and then uses the parsed pages, text items, and bounding boxes to extract user-defined fields.
+
+- When the user supplies `--fields`, normalize the loose request into a canonical schema before extracting. Default inferred fields to optional single-value `string` fields and give them stable `snake_case` names when the user does not provide one.
+- When the user supplies `--schema <file>`, treat that recipe as the stable contract for repeatable runs and downstream automations.
+- JSON is the source of truth; `--jsonl` and `--csv` are flattened export views for pipelines.
+- A reusable example schema lives at [`examples/invoice.extract.json`](../../examples/invoice.extract.json).
 
 ## Post-parse hooks
 

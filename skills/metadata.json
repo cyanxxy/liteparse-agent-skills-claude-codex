@@ -27,6 +27,10 @@
     "author": "Local Workspace",
     "version": "0.2.0"
   },
+  "extract-structured": {
+    "author": "Local Workspace",
+    "version": "0.2.0"
+  },
   "convert-format": {
     "author": "Local Workspace",
     "version": "0.2.0"
