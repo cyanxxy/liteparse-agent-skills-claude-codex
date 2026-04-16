@@ -33,7 +33,7 @@ Parse a single file at `$0` with LiteParse, applying any additional flags from `
 ```
 /liteparse:parse-document ./docs/report.pdf --format json
 /liteparse:parse-document ./contracts/master.docx --no-ocr
-/liteparse:parse-document ./scans/invoice.pdf --ocr-server-url http://localhost:5000/ocr --target-pages "1-2"
+/liteparse:parse-document ./scans/invoice.pdf --ocr-server-url http://localhost:8828/ocr --target-pages "1-2"
 /liteparse:parse-document ./slides.pptx --format text -o slides.txt
 ```
 

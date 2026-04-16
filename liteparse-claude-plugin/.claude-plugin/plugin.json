@@ -1,6 +1,6 @@
 {
   "name": "liteparse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Parse PDFs, Office files, and images locally with LiteParse. Extract text or JSON, run OCR, and generate page screenshots without cloud dependencies.",
   "author": {
     "name": "Local Workspace"

@@ -21,7 +21,7 @@ Combine the parsed output of multiple documents into a single file.
 
 3. **Merge**:
 
-   **Text mode** — concatenate all files in alphabetical order by filename. Insert a separator between each:
+   **Text mode** — concatenate all files in **natural sort order** by filename (so `page-2` comes before `page-10`). Insert a separator between each:
    ```
    ===== filename.txt =====
    ```

@@ -38,6 +38,13 @@ yarn-error.log*
 *-liteparse-output/
 *-screenshots/
 screenshots/
+*-extracted.json
+*-extracted.jsonl
+*-extracted.csv
+*-tables.json
+*-table-*.csv
+merged-output.txt
+merged-output.json
 
 # === Environment / secrets ===
 .env

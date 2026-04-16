@@ -25,9 +25,10 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - Otherwise, if the user passed `--fields`, normalize the loose request into a canonical schema before extracting. Default inferred fields to optional single-value `string` fields and generate stable `snake_case` names when the user does not provide one.
    - If neither was provided, ask the user which fields they want extracted.
    - Always go through normalization before extracting, even for a single field. That is what lets repeat runs against similar inputs produce the same shape.
-5. **Parse the file as JSON**:
+5. **Parse the file as JSON**. Create a unique temp file to avoid collisions with concurrent runs:
    ```bash
-   <cli> parse <file> --format json -o /tmp/liteparse-structured-raw.json
+   TMPFILE="$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
+   <cli> parse <file> --format json -o "$TMPFILE"
    ```
 6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns. If a field has multiple plausible matches, mark it ambiguous and preserve the evidence. If a field is missing, mark it missing instead of guessing.
 7. **Determine the output format** from the additional flags:
@@ -39,11 +40,15 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - If the user passed `-o <path>`, write there.
    - Otherwise write `<basename>-extracted.<ext>` next to the source file.
    - If `--save-schema <file>` was requested, write the normalized schema to that path so the user can reuse it later as a stable automation contract. When the source was already `--schema <src>`, the saved file is a re-serialized canonical copy; if `--save-schema` resolves to the same path as `<src>`, skip the write and say so in the report.
-9. **Report**:
-   - the exact file parsed,
-   - the schema source used (`--fields` or `--schema`),
-   - the output path if written to a file, otherwise a preview of stdout,
-   - any missing or ambiguous fields, with evidence summaries.
+9. **Clean up** the temp file:
+   ```bash
+   rm -f "$TMPFILE"
+   ```
+10. **Report**:
+    - the exact file parsed,
+    - the schema source used (`--fields` or `--schema`),
+    - the output path if written to a file, otherwise a preview of stdout,
+    - any missing or ambiguous fields, with evidence summaries.
 
 ## Schema file format
 
@@ -74,10 +79,21 @@ Schemas loaded via `--schema` and written via `--save-schema` share the shape sh
 ## Examples
 
 ```bash
-lit parse ./invoice.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract: invoice number, invoice date, total amount
-lit parse ./invoice.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract using ./examples/invoice.extract.json -> invoice-extracted.json
-lit parse ./contracts/master.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract: party name:string, effective date:date, governing law:string -> JSONL
-lit parse ./receipts/receipt.pdf --format json -o /tmp/liteparse-structured-raw.json   # then extract: merchant name, subtotal, total; save schema to ./schemas/receipt.extract.json
+# Extract inline fields — agent creates a temp file, extracts, then cleans up
+lit parse ./invoice.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
+# then extract: invoice number, invoice date, total amount
+
+# Extract using a saved schema
+lit parse ./invoice.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
+# then extract using ./invoice.extract.json -> invoice-extracted.json
+
+# Extract with typed fields and JSONL output
+lit parse ./contracts/master.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
+# then extract: party name:string, effective date:date, governing law:string -> JSONL
+
+# Extract and save the schema for reuse
+lit parse ./receipts/receipt.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
+# then extract: merchant name, subtotal, total; save schema to ./schemas/receipt.extract.json
 ```
 
 For details on CLI flags and dependency rules, see the background `liteparse` skill.

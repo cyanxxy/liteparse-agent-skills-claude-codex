@@ -20,9 +20,10 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
 
 3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
 
-4. **Parse the file as JSON**:
+4. **Parse the file as JSON**. Create a unique temp file to avoid collisions with concurrent runs:
    ```bash
-   <cli> parse <file> --format json -o /tmp/liteparse-tables-raw.json
+   TMPFILE="$(mktemp /tmp/liteparse-tables-XXXXXX.json)"
+   <cli> parse <file> --format json -o "$TMPFILE"
    ```
 
 5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Identify items that represent tables by:
@@ -42,7 +43,12 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
      - CSV: write `<basename>-table-1.csv`, `<basename>-table-2.csv` next to the source file
      - JSON: write `<basename>-tables.json` next to the source file
 
-8. **Report**:
+8. **Clean up** the temp file:
+   ```bash
+   rm -f "$TMPFILE"
+   ```
+
+9. **Report**:
    - Number of tables found
    - Rows and columns per table
    - Output path(s)

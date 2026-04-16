@@ -132,7 +132,7 @@ Define shell commands in `liteparse.config.json` that run automatically after op
       "git add '{{output}}'"
     ],
     "postBatchParse": [
-      "curl -X POST https://api.example.com/notify -d '{\"dir\": \"{{outputDir}}\"}'"
+      "curl -s -X POST https://api.example.com/notify --data-urlencode 'dir={{outputDir}}'"
     ],
     "postScreenshot": [
       "echo 'Screenshots saved to {{outputDir}}'"
@@ -151,12 +151,11 @@ Define shell commands in `liteparse.config.json` that run automatically after op
 | `postScreenshot` | After screenshot generation | `{{file}}`, `{{outputDir}}` |
 | `postConvert` | After format conversion | `{{file}}`, `{{output}}` |
 
-Hooks run via `bash -c` with `{{...}}` template variables substituted as raw strings before execution. **Always single-quote template variables** in your hook commands (e.g. `'{{file}}'`, `'{{outputDir}}'`) — otherwise a filename containing spaces, quotes, or shell metacharacters will break the command or, if the source paths are attacker-controlled, inject arbitrary shell commands. All examples above follow this rule. Failed hooks are reported but don't roll back the operation.
+Hooks run via `bash -c` with `{{...}}` template variables substituted as raw strings before execution. **Always single-quote template variables** in your hook commands (e.g. `'{{file}}'`, `'{{outputDir}}'`) — otherwise a filename containing spaces or shell metacharacters will break the command or inject arbitrary shell. Before substitution, escape `'` in each value by replacing it with `'\''` to prevent single-quote breakout. Never embed passwords or secrets in hook commands — they are visible in `ps` output and may be logged. Failed hooks are reported but don't roll back the operation.
 
 ## Requirements
 
 - Node.js 20.11+ and `npm` (for the `npx` fallback)
-- Python 3.12+ for the Python SDK and OCR server packages
 - Optional: `lit` installed globally (`npm i -g @llamaindex/liteparse`)
 - Optional: LibreOffice (for Office formats and `/liteparse:convert-format`)
 - Optional: ImageMagick (for image inputs)

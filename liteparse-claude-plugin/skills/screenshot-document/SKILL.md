@@ -32,7 +32,7 @@ Generate page screenshots from the PDF at `$0` into the directory `$1` (or a sen
 /liteparse:screenshot-document ./docs/report.pdf
 /liteparse:screenshot-document ./docs/report.pdf ./report-pages --target-pages "1-3" --dpi 300
 /liteparse:screenshot-document ./docs/report.pdf --format jpg
-/liteparse:screenshot-document ./encrypted.pdf ./out --password secret
+/liteparse:screenshot-document ./encrypted.pdf ./out --password secret   # caution: password visible in ps/history; prefer --config
 ```
 
 For CLI flag details, see the background `liteparse` skill.

@@ -42,7 +42,6 @@ Hooks execute via `bash -c` with `{{...}}` substituted as raw strings. **Always 
 ## Requirements
 
 - Node.js 20.11+ and `npm` (for the `npx` fallback).
-- Python 3.12+ for the Python SDK and OCR server packages.
 - Optional: `lit` installed globally: `npm i -g @llamaindex/liteparse`.
 - Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
 - Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).

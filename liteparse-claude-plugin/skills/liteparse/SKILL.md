@@ -59,7 +59,7 @@ apt-get install imagemagick
 - `--dpi <n>` (default 150)
 - `--no-precise-bbox` (faster; drops precise bounding boxes)
 - `--preserve-small-text` (keeps very small text that would otherwise be dropped)
-- `--password <pw>` for encrypted PDFs
+- `--password <pw>` for encrypted PDFs (**caution**: the password is visible in process lists and shell history; prefer passing it via `--config` with a gitignored config file)
 - `--config <file>` JSON config
 - `--recursive` (batch-parse only)
 - `--extension ".pdf"` (batch-parse only)
@@ -70,7 +70,7 @@ apt-get install imagemagick
 - `--target-pages "1,3,5"` or `"1-5"`
 - `--dpi <n>`
 - `--format png|jpg` (default `png`)
-- `--password <pw>`
+- `--password <pw>` (**caution**: visible in process lists; prefer `--config`)
 - `--config <file>`
 - `-q, --quiet`
 
@@ -160,7 +160,7 @@ The config file supports a `hooks` object that defines shell commands to run aut
       "git add '{{output}}'"
     ],
     "postBatchParse": [
-      "curl -X POST https://api.example.com/notify -d '{\"dir\": \"{{outputDir}}\"}'"
+      "curl -s -X POST https://api.example.com/notify --data-urlencode 'dir={{outputDir}}'"
     ]
   }
 }
@@ -170,14 +170,18 @@ The config file supports a `hooks` object that defines shell commands to run aut
 
 1. After a successful parse/batch/screenshot/convert, check if a `liteparse.config.json` exists (passed via `--config` or in the project root).
 2. Read the `hooks` object and find the matching hook array for the completed operation.
-3. For each command, substitute `{{...}}` template variables with actual paths, then run via `bash -c`.
+3. For each command, **escape single quotes** in each value (replace `'` with `'\''`), substitute `{{...}}` template variables with the escaped values, then run via `bash -c`.
 4. Report hook results after the main operation report.
 5. If a hook fails, report the error but do **not** roll back the parse output.
 6. Show the user which hook commands will run before executing them for the first time in a session.
 
 ### Hook safety
 
-Template variables are substituted as raw strings into a shell command before `bash -c` runs it. Users must single-quote every `{{...}}` placeholder in their hook templates (e.g. `'{{file}}'`, `'{{outputDir}}'`) so that filenames containing spaces, quotes, or shell metacharacters do not break the command or inject arbitrary shell. When reviewing or suggesting hook config, flag any `{{...}}` that is not single-quoted as a shell-injection risk.
+Template variables are substituted as raw strings into a shell command before `bash -c` runs it.
+
+1. **Single-quote every `{{...}}`** in hook templates (e.g. `'{{file}}'`, `'{{outputDir}}'`) so that spaces and most shell metacharacters are safe. Flag any `{{...}}` that is not single-quoted as a shell-injection risk.
+2. **Escape single quotes in values before substitution.** A filename containing `'` will break out of single quotes. Before replacing a `{{...}}` token, replace every `'` in the value with `'\''` (close quote, escaped literal quote, reopen quote). For example, a path `it's here` becomes `it'\''s here`, which is safe inside `'...'`.
+3. **Passwords and secrets** should never appear in hook commands. Use environment variables or a separate config file instead — hook commands are visible in the process list (`ps`) and may be logged.
 
 ## HTTP OCR server API (advanced)
 
@@ -215,4 +219,4 @@ Office documents require LibreOffice; images require ImageMagick. LiteParse auto
 | LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
 | ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
 | OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |
-| Password-protected PDF fails | `--password <pw>` was not provided |
+| Password-protected PDF fails | `--password <pw>` was not provided (prefer `--config` to avoid leaking passwords in process lists and shell history) |

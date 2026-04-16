@@ -66,5 +66,6 @@ libreoffice --headless --convert-to pdf --outdir . "./invoice.html"
 ## Notes
 
 - This skill does **not** parse or extract text — it converts the file format directly. For text extraction, use the `parse-document` skill.
+- **Concurrent conversions**: LibreOffice's `--headless` mode can fail or produce corrupt output when multiple instances run simultaneously. If running parallel conversions, serialize them or use separate `--env:UserInstallation` paths for each instance.
 - Conversion quality depends on LibreOffice's support for the input format. Complex formatting (macros, embedded objects, advanced layouts) may not convert perfectly.
 - PDF to DOCX conversion is supported but limited — LibreOffice produces a best-effort editable document from the PDF layout.

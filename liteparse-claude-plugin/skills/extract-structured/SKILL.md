@@ -22,9 +22,10 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - Otherwise, if the user passed `--fields`, normalize the loose request into a canonical schema before extracting. Default inferred fields to optional single-value `string` fields and generate stable `snake_case` names when the user does not provide one.
    - If neither was provided, ask the user which fields they want extracted.
    - Always go through normalization before extracting, even for a single field. That is what lets repeat runs against similar inputs produce the same shape.
-5. **Parse the file as JSON**:
+5. **Parse the file as JSON**. Create a unique temp file to avoid collisions with concurrent runs:
    ```bash
-   <cli> parse <file> --format json -o /tmp/liteparse-structured-raw.json
+   TMPFILE="$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
+   <cli> parse <file> --format json -o "$TMPFILE"
    ```
 6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns. If a field has multiple plausible matches, mark it ambiguous and preserve the evidence. If a field is missing, mark it missing instead of guessing.
 7. **Determine the output format** from `$ARGUMENTS`:
@@ -36,11 +37,15 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - If the user passed `-o <path>`, write there.
    - Otherwise write `<basename>-extracted.<ext>` next to the source file.
    - If `--save-schema <file>` was requested, write the normalized schema to that path so the user can reuse it later as a stable automation contract. When the source was already `--schema <src>`, the saved file is a re-serialized canonical copy; if `--save-schema` resolves to the same path as `<src>`, skip the write and say so in the report.
-9. **Report**:
-   - the exact file parsed,
-   - the schema source used (`--fields` or `--schema`),
-   - the output path if written to a file, otherwise a preview of stdout,
-   - any missing or ambiguous fields, with evidence summaries.
+9. **Clean up** the temp file:
+   ```bash
+   rm -f "$TMPFILE"
+   ```
+10. **Report**:
+    - the exact file parsed,
+    - the schema source used (`--fields` or `--schema`),
+    - the output path if written to a file, otherwise a preview of stdout,
+    - any missing or ambiguous fields, with evidence summaries.
 
 ## Schema file format
 

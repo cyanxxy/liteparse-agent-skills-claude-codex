@@ -27,7 +27,7 @@ Run LiteParse over every supported file in an input directory, writing results t
 ```bash
 lit batch-parse ./docs ./parsed-docs --format json --recursive
 lit batch-parse ./contracts ./contracts-json --extension ".pdf" --no-ocr
-lit batch-parse ./scans ./scans-out --ocr-server-url http://localhost:5000/ocr
+lit batch-parse ./scans ./scans-out --ocr-server-url http://localhost:8828/ocr
 ```
 
 For CLI flag details and dependency rules, see the background `liteparse` skill.

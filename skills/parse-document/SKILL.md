@@ -36,7 +36,7 @@ Parse a single file with LiteParse, applying any additional flags the user suppl
 ```bash
 lit parse ./docs/report.pdf --format json
 lit parse ./contracts/master.docx --no-ocr
-lit parse ./scans/invoice.pdf --ocr-server-url http://localhost:5000/ocr --target-pages "1-2"
+lit parse ./scans/invoice.pdf --ocr-server-url http://localhost:8828/ocr --target-pages "1-2"
 lit parse ./slides.pptx --format text -o slides.txt
 ```
 

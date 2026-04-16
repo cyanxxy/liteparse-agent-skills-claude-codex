@@ -24,15 +24,17 @@ Parse two documents with LiteParse and diff their text content.
 
 3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
 
-4. **Parse both files** to text. Run two parse commands:
+4. **Parse both files** to text. Create unique temp files to avoid collisions with concurrent runs:
    ```bash
-   <cli> parse <file-a> --format text -o /tmp/liteparse-compare-a.txt
-   <cli> parse <file-b> --format text -o /tmp/liteparse-compare-b.txt
+   TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)"
+   TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
+   <cli> parse <file-a> --format text -o "$TMPA"
+   <cli> parse <file-b> --format text -o "$TMPB"
    ```
 
 5. **Diff the parsed text**:
    ```bash
-   diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
+   diff -u "$TMPA" "$TMPB"
    ```
    If `diff` reports no differences, tell the user the documents are textually identical.
 
@@ -43,7 +45,10 @@ Parse two documents with LiteParse and diff their text content.
 
 7. **Optional output file**. If the user passed `-o <path>` as an additional flag, write the unified diff to that path and report it.
 
-8. **Clean up** the temp files.
+8. **Clean up** the temp files:
+   ```bash
+   rm -f "$TMPA" "$TMPB"
+   ```
 
 9. **Report**:
    - The two files compared
@@ -54,9 +59,13 @@ Parse two documents with LiteParse and diff their text content.
 ## Examples
 
 ```bash
-lit parse ./contracts/v1.pdf --format text -o /tmp/liteparse-compare-a.txt && lit parse ./contracts/v2.pdf --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
-lit parse ./resume-old.docx --format text -o /tmp/liteparse-compare-a.txt && lit parse ./resume-new.docx --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt > changes.diff
-lit parse ./spec-draft.pdf --format text -o /tmp/liteparse-compare-a.txt && lit parse ./spec-final.pdf --format text -o /tmp/liteparse-compare-b.txt && diff -u /tmp/liteparse-compare-a.txt /tmp/liteparse-compare-b.txt
+# Compare two contract versions
+TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)" && TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
+lit parse ./contracts/v1.pdf --format text -o "$TMPA" && lit parse ./contracts/v2.pdf --format text -o "$TMPB" && diff -u "$TMPA" "$TMPB"; rm -f "$TMPA" "$TMPB"
+
+# Compare resumes and save diff to file
+TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)" && TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
+lit parse ./resume-old.docx --format text -o "$TMPA" && lit parse ./resume-new.docx --format text -o "$TMPB" && diff -u "$TMPA" "$TMPB" > changes.diff; rm -f "$TMPA" "$TMPB"
 ```
 
 For CLI flag details and dependency rules, see the background `liteparse` skill.

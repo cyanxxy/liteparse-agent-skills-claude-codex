@@ -35,7 +35,7 @@ Generate page screenshots from a PDF.
 lit screenshot ./docs/report.pdf -o ./report-pages
 lit screenshot ./docs/report.pdf -o ./report-pages --target-pages "1-3" --dpi 300
 lit screenshot ./docs/report.pdf -o ./out --format jpg
-lit screenshot ./encrypted.pdf -o ./out --password secret
+lit screenshot ./encrypted.pdf -o ./out --password secret   # caution: password visible in ps/history; prefer --config
 ```
 
 For CLI flag details, see the background `liteparse` skill.

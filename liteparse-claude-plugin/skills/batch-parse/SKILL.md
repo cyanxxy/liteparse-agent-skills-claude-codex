@@ -30,7 +30,7 @@ Run LiteParse over every supported file in `$0`, writing results to `$1` (or a s
 /liteparse:batch-parse ./docs
 /liteparse:batch-parse ./docs ./parsed-docs --format json --recursive
 /liteparse:batch-parse ./contracts ./contracts-json --extension ".pdf" --no-ocr
-/liteparse:batch-parse ./scans ./scans-out --ocr-server-url http://localhost:5000/ocr
+/liteparse:batch-parse ./scans ./scans-out --ocr-server-url http://localhost:8828/ocr
 ```
 
 For CLI flag details and dependency rules, see the background `liteparse` skill.
