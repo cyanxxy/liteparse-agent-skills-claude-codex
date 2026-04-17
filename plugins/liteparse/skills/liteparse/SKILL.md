@@ -5,39 +5,25 @@ description: Background knowledge for running LiteParse: choosing between instal
 
 # LiteParse Reference
 
-LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills (parse-document, batch-parse, screenshot-document, extract-structured, extract-tables, compare-documents, convert-format, merge-parsed). Use it to look up CLI flags, dependency rules, and failure handling — the action skills defer here for those details.
-
-## Initial Setup
-
-When this skill is invoked, respond with:
-
-```
-I'm ready to use LiteParse to parse files locally. Before we begin, please confirm that:
-
-- `@llamaindex/liteparse` is installed globally (`npm i -g @llamaindex/liteparse`)
-- The `lit` CLI command is available in your terminal
-
-If `lit` is not installed, I will use `npx -y @llamaindex/liteparse` as a fallback.
-
-Please provide:
-
-1. One or more files to parse (PDF, DOCX, PPTX, XLSX, images, etc.)
-2. Any specific options: output format (json/text), page ranges, OCR preferences, DPI, etc.
-3. What you'd like to do with the parsed content.
-```
-
-Then wait for the user's input.
+LiteParse is a local, no-cloud document parser. This skill is **reference only** — it provides context for the action skills (parse-document, batch-parse, screenshot-document, extract-structured, extract-tables, compare-documents, convert-format, merge-parsed). Do not execute steps from this skill directly; defer to whichever action skill is active.
 
 ---
 
-## Step 0 — Install LiteParse (if needed)
+## Install LiteParse (if needed)
 
 LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are registered: `lit` and `liteparse`, pointing to the same script.
 
-If `lit` is not installed, install it globally:
+If `lit` is not installed, install it globally via npm:
 
 ```bash
 npm i -g @llamaindex/liteparse
+```
+
+Or via Homebrew (macOS/Linux):
+
+```bash
+brew tap run-llama/liteparse
+brew install llamaindex-liteparse
 ```
 
 Verify installation:
@@ -57,7 +43,7 @@ lit --version
   npx -y @llamaindex/liteparse screenshot file.pdf -o ./out --target-pages "1-3"
   ```
 
-- **When neither is available**: Node.js 20.11+ and npm are required.
+- **When neither is available**: Node.js 18+ and npm are required.
 
 For Office document support (DOCX, PPTX, XLSX), LibreOffice is required:
 
@@ -87,9 +73,16 @@ apt-get install imagemagick
 | DOC, DOCX, DOCM, ODT, RTF, PPT, PPTX, PPTM, ODP, XLS, XLSX, XLSM, ODS, CSV, TSV | LibreOffice | `libreoffice` |
 | JPG, JPEG, PNG, GIF, BMP, TIFF, WebP, SVG | ImageMagick | `magick` or `convert` |
 
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `TESSDATA_PREFIX` | Path to a directory containing Tesseract `.traineddata` files — required when running OCR offline or with non-default languages. |
+| `LITEPARSE_TMPDIR` | Override the temp directory used for format conversion and intermediate files (default: system temp). Useful on systems with small `/tmp` or for isolating concurrent runs. |
+
 ---
 
-## Step 1 — CLI Commands
+## CLI Commands
 
 ### Parse a Single File
 
@@ -123,7 +116,7 @@ The output directory is passed via `-o`, not as a positional argument.
 
 ---
 
-## Step 2 — Supported Flags (upstream CLI, v1.4.x)
+## Supported Flags (upstream CLI, v1.5.x)
 
 ### `parse` / `batch-parse`
 
@@ -185,7 +178,7 @@ The output directory is passed via `-o`, not as a positional argument.
 
 ---
 
-## Step 3 — Config File and Post-Parse Hooks
+## Config File and Post-Parse Hooks
 
 For repeated use with consistent options, create a `liteparse.config.json`. Any command accepts `--config <file>` to load consistent defaults (OCR language, DPI, max pages, output format, etc.).
 
@@ -264,7 +257,7 @@ Template variables are substituted as raw strings into a shell command before `b
 
 ---
 
-## Step 4 — Structured Extraction Recipes
+## Structured Extraction Recipes
 
 The `extract-structured` skill is an agent-facing recipe workflow, not a new upstream `lit` subcommand. It starts from `lit parse <file> --format json` and then uses the parsed pages, text items, and bounding boxes to extract user-defined fields.
 
@@ -275,7 +268,7 @@ The `extract-structured` skill is an agent-facing recipe workflow, not a new ups
 
 ---
 
-## Step 5 — HTTP OCR Server API (Advanced)
+## HTTP OCR Server API (Advanced)
 
 If the user wants to plug in a custom OCR backend, the server must implement:
 
@@ -310,7 +303,7 @@ Office documents require LibreOffice; images require ImageMagick. LiteParse auto
 
 | Symptom | Cause |
 |---|---|
-| `lit` not found and `npm` not found | Node.js 20.11+ and npm are not installed |
+| `lit` not found and `npm` not found | Node.js 18+ and npm are not installed |
 | LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
 | ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
 | OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |

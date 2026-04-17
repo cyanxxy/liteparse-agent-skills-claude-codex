@@ -1,9 +1,11 @@
 {
   "ocrLanguage": "en",
   "ocrEnabled": true,
+  "ocrServerUrl": "",
   "maxPages": 1000,
   "dpi": 150,
   "outputFormat": "json",
+  "preciseBoundingBox": true,
   "preserveVerySmallText": false,
 
   "hooks": {

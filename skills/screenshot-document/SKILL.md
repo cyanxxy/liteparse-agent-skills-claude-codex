@@ -1,7 +1,7 @@
 ---
 name: screenshot-document
 description: Render PDF pages as PNG or JPG images with LiteParse. Use when exporting selected pages as screenshots, generating image previews for visual inspection, or producing page renders for agent reasoning.
-compatibility: Requires Node 20.11+ and `@llamaindex/liteparse`.
+compatibility: Requires Node 18+ and `@llamaindex/liteparse`.
 license: Apache-2.0
 metadata:
   author: Local Workspace

@@ -155,10 +155,11 @@ Hooks run via `bash -c` with `{{...}}` template variables substituted as raw str
 
 ## Requirements
 
-- Node.js 20.11+ and `npm` (for the `npx` fallback)
-- Optional: `lit` installed globally (`npm i -g @llamaindex/liteparse`)
+- Node.js 18+ and `npm` (for the `npx` fallback)
+- Optional: `lit` installed globally (`npm i -g @llamaindex/liteparse`, or `brew tap run-llama/liteparse && brew install llamaindex-liteparse`)
 - Optional: LibreOffice (for Office formats and `/liteparse:convert-format`)
 - Optional: ImageMagick (for image inputs)
+- Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs), `LITEPARSE_TMPDIR` (custom temp directory)
 
 ## Credits
 

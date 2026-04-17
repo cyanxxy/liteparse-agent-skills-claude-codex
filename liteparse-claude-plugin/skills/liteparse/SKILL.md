@@ -13,7 +13,7 @@ LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are reg
 
 - **When `lit` is on PATH**: commands are `lit parse`, `lit batch-parse`, `lit screenshot`.
 - **When only `npm` / `npx` is available**: the `lit` prefix is dropped — `npx -y @llamaindex/liteparse parse`, `npx -y @llamaindex/liteparse batch-parse`, `npx -y @llamaindex/liteparse screenshot`.
-- **When neither is available**: Node.js 20.11+ and npm are required. Install with `npm i -g @llamaindex/liteparse`, then verify with `lit --version`.
+- **When neither is available**: Node.js 18+ and npm are required. Install with `npm i -g @llamaindex/liteparse` or via Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`), then verify with `lit --version`.
 
 ### Installing extra dependencies
 
@@ -45,7 +45,14 @@ apt-get install imagemagick
 | DOC, DOCX, DOCM, ODT, RTF, PPT, PPTX, PPTM, ODP, XLS, XLSX, XLSM, ODS, CSV, TSV | LibreOffice | `libreoffice` |
 | JPG, JPEG, PNG, GIF, BMP, TIFF, WebP, SVG | ImageMagick | `magick` or `convert` |
 
-## Supported flags (upstream CLI, v1.4.x)
+## Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `TESSDATA_PREFIX` | Path to a directory containing Tesseract `.traineddata` files — required when running OCR offline or with non-default languages. |
+| `LITEPARSE_TMPDIR` | Override the temp directory used for format conversion and intermediate files (default: system temp). Useful on systems with small `/tmp` or for isolating concurrent runs. |
+
+## Supported flags (upstream CLI, v1.5.x)
 
 **`parse` / `batch-parse`:**
 - `--format json|text` (default `text`)
@@ -215,7 +222,7 @@ Office documents require LibreOffice; images require ImageMagick. LiteParse auto
 
 | Symptom | Cause |
 |---|---|
-| `lit` not found and `npm` not found | Node.js 20.11+ and npm are not installed |
+| `lit` not found and `npm` not found | Node.js 18+ and npm are not installed |
 | LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
 | ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
 | OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |

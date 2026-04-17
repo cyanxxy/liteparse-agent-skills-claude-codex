@@ -1,7 +1,7 @@
 ---
 name: liteparse
 description: Use this skill when the user asks to parse, convert, compare, merge, or extract data from unstructured files (PDF, DOCX, PPTX, XLSX, images, etc.) locally without cloud dependencies.
-compatibility: Requires Node 20.11+ and `@llamaindex/liteparse` installed globally via npm (`npm i -g @llamaindex/liteparse`). LibreOffice for Office files. ImageMagick for images.
+compatibility: Requires Node 18+ and `@llamaindex/liteparse` installed globally via npm (`npm i -g @llamaindex/liteparse`). LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:
   author: Local Workspace
@@ -41,10 +41,17 @@ Then wait for the user's input.
 
 LiteParse ships as the npm package `@llamaindex/liteparse`. Two binaries are registered: `lit` and `liteparse`, pointing to the same script.
 
-If `lit` is not installed, install it globally:
+If `lit` is not installed, install it globally via npm:
 
 ```bash
 npm i -g @llamaindex/liteparse
+```
+
+Or via Homebrew (macOS/Linux):
+
+```bash
+brew tap run-llama/liteparse
+brew install llamaindex-liteparse
 ```
 
 Verify installation:
@@ -64,7 +71,7 @@ lit --version
   npx -y @llamaindex/liteparse screenshot file.pdf -o ./out --target-pages "1-3"
   ```
 
-- **When neither is available**: Node.js 20.11+ and npm are required.
+- **When neither is available**: Node.js 18+ and npm are required.
 
 For Office document support (DOCX, PPTX, XLSX), LibreOffice is required:
 
@@ -93,6 +100,13 @@ apt-get install imagemagick
 | PDF | None | — |
 | DOC, DOCX, DOCM, ODT, RTF, PPT, PPTX, PPTM, ODP, XLS, XLSX, XLSM, ODS, CSV, TSV | LibreOffice | `libreoffice` |
 | JPG, JPEG, PNG, GIF, BMP, TIFF, WebP, SVG | ImageMagick | `magick` or `convert` |
+
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `TESSDATA_PREFIX` | Path to a directory containing Tesseract `.traineddata` files — required when running OCR offline or with non-default languages. |
+| `LITEPARSE_TMPDIR` | Override the temp directory used for format conversion and intermediate files (default: system temp). Useful on systems with small `/tmp` or for isolating concurrent runs. |
 
 ---
 
@@ -130,7 +144,7 @@ The output directory is passed via `-o`, not as a positional argument.
 
 ---
 
-## Step 2 — Supported Flags (upstream CLI, v1.4.x)
+## Step 2 — Supported Flags (upstream CLI, v1.5.x)
 
 ### `parse` / `batch-parse`
 
@@ -317,7 +331,7 @@ Office documents require LibreOffice; images require ImageMagick. LiteParse auto
 
 | Symptom | Cause |
 |---|---|
-| `lit` not found and `npm` not found | Node.js 20.11+ and npm are not installed |
+| `lit` not found and `npm` not found | Node.js 18+ and npm are not installed |
 | LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
 | ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
 | OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |

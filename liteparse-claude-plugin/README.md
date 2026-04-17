@@ -42,10 +42,11 @@ See the background `liteparse` skill for full hook documentation.
 
 ## Requirements
 
-- Node.js 20.11+ and `npm` (for the `npx` fallback).
-- Optional: `lit` installed globally: `npm i -g @llamaindex/liteparse`.
+- Node.js 18+ and `npm` (for the `npx` fallback).
+- Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`) or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
 - Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
 - Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).
+- Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs), `LITEPARSE_TMPDIR` (custom temp directory).
 
 If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse`.
 

@@ -1,7 +1,7 @@
 ---
 name: extract-structured
 description: Extract user-defined fields (invoice numbers, dates, totals, parties, line items, etc.) from PDFs, Office docs, and images into repeatable structured JSON, JSONL, or CSV. Use whenever specific named fields must be pulled from a document, inline or via a saved schema.
-compatibility: Requires Node 20.11+ and `@llamaindex/liteparse`. LibreOffice for Office files. ImageMagick for images.
+compatibility: Requires Node 18+ and `@llamaindex/liteparse`. LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:
   author: Local Workspace
