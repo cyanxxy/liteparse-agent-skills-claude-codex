@@ -1,6 +1,6 @@
 ---
 name: compare-documents
-description: Parse two documents and produce a structured diff showing what changed between them. Use for comparing contract versions, resume revisions, spec updates, or any two documents.
+description: Parse two documents and produce a structured diff showing what changed between them. Use for diffing contract versions, comparing resume revisions, reviewing spec updates, redline reviews, seeing what changed between two PDFs or Word files, or any "what's different between these two files" request.
 compatibility: Requires Node 18+ and `@llamaindex/liteparse`. LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:

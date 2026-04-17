@@ -29,10 +29,19 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
    <cli> parse <file> --format json -o "$TMPFILE"
    ```
 
-5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Identify items that represent tables by:
-   - Looking for `"type": "table"` items
-   - Detecting grid-like structures with consistent row/column patterns in text blocks
-   - Grouping adjacent text items that share aligned x-coordinates (columns) and sequential y-coordinates (rows)
+5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Apply this detection order:
+
+   **(a) Native tables first.** If the JSON contains items with `"type": "table"`, use them directly — these already have rows and cells resolved by LiteParse. Skip heuristic detection for these regions.
+
+   **(b) Heuristic grid detection** (only for pages that had no `type: table` items):
+   - **Column detection**: Cluster text items by their `bbox` x-start coordinate. Two items belong to the same column if their x-starts differ by ≤ 5% of page width (or ≤ 10px on 150 DPI renders). A column must have ≥ 3 aligned items to count.
+   - **Row detection**: Within a candidate column cluster, sort items by y-coordinate. Two items belong to the same row if their y-centers differ by ≤ 0.5 × median line height on the page.
+   - **Minimum table size**: Require ≥ 2 columns and ≥ 2 rows (the header row counts). Discard anything smaller as running text.
+   - **Header detection**: Treat the top row as the header if (1) its text items are bold/larger than the body rows, or (2) the row below contains primarily numeric values while the top row is textual.
+
+   **(c) Deterministic ordering**: Emit tables in reading order — page number ascending, then by top-left y-coordinate ascending. This keeps output stable across runs.
+
+   If neither (a) nor (b) produces any result on a page, do not fabricate a table — proceed to the next page.
 
 6. **Determine output format** from the additional flags:
    - `--csv` (default if not specified): write each table as a separate CSV file
@@ -79,3 +88,5 @@ lit parse ./scan.pdf --format json --target-pages "1-3" -o "$TMPFILE"   # then e
 - Table extraction quality depends on the document structure. Well-formatted PDFs with explicit table borders yield the best results.
 - For scanned documents, ensure OCR is enabled (it is by default).
 - XLSX files already contain structured data — for these, LiteParse extracts sheet content directly, which typically produces cleaner table output.
+- **Merged cells**: when a cell visually spans multiple columns or rows, emit the value in its top-left cell and leave the spanned cells empty (`""`). Note the merge in the report if you want the consumer to know.
+- **Multi-row headers**: if two consecutive rows both look header-like, concatenate them as `"<parent> - <child>"` column names (e.g. `"Q1 - Revenue"`).

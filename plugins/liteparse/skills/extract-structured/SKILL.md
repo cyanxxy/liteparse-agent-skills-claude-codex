@@ -25,7 +25,20 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    TMPFILE="$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
    <cli> parse <file> --format json -o "$TMPFILE"
    ```
-6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns. If a field has multiple plausible matches, mark it ambiguous and preserve the evidence. If a field is missing, mark it missing instead of guessing.
+6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns.
+
+   **Single-value fields** (`multiple: false`):
+   - Emit as `{"value": <parsed>, "confidence": <0.0-1.0>, "evidence": {"page": <n>, "text": "<matching source text>"}}`.
+   - If multiple plausible matches exist, set `value` to the best one and add `"alternatives": [{"value": ..., "evidence": ...}]` listing the other candidates. Mark `"status": "ambiguous"` so downstream consumers can flag it.
+   - If no match is found, emit `{"value": null, "status": "missing", "evidence": null}`. Never guess.
+
+   **Multi-value fields** (`multiple: true`, e.g. line items, party names, repeating rows):
+   - Walk repeating patterns in the parsed output — table rows, list items, or text blocks that share consistent label/value structure on the same page or across pages.
+   - Emit as `{"values": [<entry>, <entry>, ...], "confidence": <0.0-1.0>, "evidence": {"source": "table|list|pattern", "page": <n>}}`.
+   - For line-item-style rows, each entry should itself be an object matching the sub-field shape if the schema declares sub-fields; otherwise a flat value per row.
+   - If the pattern is partially matched (e.g. 4 of 5 rows parse cleanly), include all successful entries and add `"status": "partial"` with a count of skipped rows in `evidence`.
+
+   **Type coercion**: cast values to the field's declared `type` (string/number/date/boolean) before emitting. On coercion failure, keep the raw string as `value` and set `"status": "type_mismatch"`.
 7. **Determine the output format** from the additional flags:
    - `--json` (default)
    - `--jsonl`

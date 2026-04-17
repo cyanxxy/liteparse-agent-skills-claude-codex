@@ -299,6 +299,25 @@ Office documents require LibreOffice; images require ImageMagick. LiteParse auto
 
 ---
 
+## Common Workflows (skill chaining)
+
+The action skills compose naturally for common real-world tasks. When a user's request matches one of these patterns, chain the skills in order rather than reinventing the pipeline.
+
+| Goal | Chain |
+|---|---|
+| Consolidate a folder of PDFs into one searchable JSON file | `/liteparse:batch-parse` (→ JSON) → `/liteparse:merge-parsed` (→ single JSON) |
+| Extract fields from every invoice in a directory | `/liteparse:batch-parse` (→ JSON) → `/liteparse:extract-structured` run per file with a shared `--schema` |
+| Summarize a scanned report | `/liteparse:parse-document` (→ text) → hand the text to the summarizer |
+| Compare two contracts for review | `/liteparse:compare-documents <a> <b>` |
+| Make a PowerPoint deck searchable | `/liteparse:convert-format deck.pptx --to pdf` → `/liteparse:parse-document deck.pdf --format json` |
+| Generate page previews of an Office doc | `/liteparse:convert-format report.docx --to pdf` → `/liteparse:screenshot-document report.pdf` |
+| Pull a table out of a scanned PDF | `/liteparse:parse-document scan.pdf --format json` → `/liteparse:extract-tables scan.pdf` |
+| Extract invoice line items (repeating rows) | `/liteparse:extract-structured invoice.pdf --schema invoice.extract.json` with a `multiple: true` line-items field |
+
+When proposing a chain, always show the user the intermediate artifacts (temp file paths, counts, etc.) so they can audit each stage.
+
+---
+
 ## Known Failure Modes
 
 | Symptom | Cause |

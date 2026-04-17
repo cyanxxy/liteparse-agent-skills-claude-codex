@@ -1,6 +1,6 @@
 ---
 name: compare-documents
-description: Parse two documents and produce a structured diff showing what changed between them. Use for comparing contract versions, resume revisions, spec updates, or any two documents.
+description: Parse two documents and produce a structured diff showing what changed between them. Use for diffing contract versions, comparing resume revisions, reviewing spec updates, redline reviews, seeing what changed between two PDFs or Word files, or any "what's different between these two files" request.
 argument-hint: "<file-a> <file-b>"
 allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(diff *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---
