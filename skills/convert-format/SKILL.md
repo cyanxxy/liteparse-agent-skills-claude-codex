@@ -47,15 +47,14 @@ Convert a document from one format to another using LibreOffice's headless conve
    mv "<libreoffice-output>" "<user-output>"
    ```
 
-7. **Verify the output** exists and has a non-zero size. If the output file is missing or empty, report the failure and **skip post-convert hooks**.
+7. **Verify the output** exists and has a non-zero size. If the output file is missing or empty, report the failure and stop.
 
-8. **Post-convert hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postConvert`, execute each command after the verification in step 7 passes. Substitute `{{file}}` with the input path and `{{output}}` with the **final output path** (after any rename in step 6) before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the conversion output.
+8. **Config files**: if the user passed `--config <file>`, report which config file was used. Do not inspect or execute `hooks.*` entries as part of this workflow.
 
 9. **Report**:
    - Input file and format
    - Output file and format
    - File size of the output
-   - Hooks executed and their results
    - Any errors from LibreOffice verbatim
 
 ## Examples

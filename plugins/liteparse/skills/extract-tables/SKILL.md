@@ -16,12 +16,13 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
    - Image files: verify `which magick || which convert`.
    - PDFs: no extra dependency.
 
-3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
 
-4. **Parse the file as JSON**. Create a unique temp file to avoid collisions with concurrent runs:
+4. **Create a per-run temp directory and parse the file as JSON**:
    ```bash
-   TMPFILE="$(mktemp /tmp/liteparse-tables-XXXXXX.json)"
-   <cli> parse <file> --format json -o "$TMPFILE"
+   tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-tables.XXXXXX")
+   trap 'rm -rf -- "$tmpdir"' EXIT
+   <cli> parse <file> --format json -o "$tmpdir/raw.json"
    ```
 
 5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Apply this detection order:
@@ -50,10 +51,7 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
      - CSV: write `<basename>-table-1.csv`, `<basename>-table-2.csv` next to the source file
      - JSON: write `<basename>-tables.json` next to the source file
 
-8. **Clean up** the temp file:
-   ```bash
-   rm -f "$TMPFILE"
-   ```
+8. **Clean up** the temp directory.
 
 9. **Report**:
    - Number of tables found
@@ -64,18 +62,11 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
 ## Examples
 
 ```bash
-# Extract tables as CSV (default) — agent creates temp file, extracts, then cleans up
-TMPFILE="$(mktemp /tmp/liteparse-tables-XXXXXX.json)"
-lit parse ./report.pdf --format json -o "$TMPFILE"   # then extract tables, then rm -f "$TMPFILE"
-
-# Extract from XLSX into a directory
-lit parse ./financials.xlsx --format json -o "$TMPFILE"   # then extract -> ./tables/
-
-# Extract as JSON
-lit parse ./invoice.pdf --format json -o "$TMPFILE"   # then extract as JSON -> invoice-tables.json
-
-# Extract from specific pages
-lit parse ./scan.pdf --format json --target-pages "1-3" -o "$TMPFILE"   # then extract tables as CSV
+tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-tables.XXXXXX") && trap 'rm -rf -- "$tmpdir"' EXIT
+lit parse ./report.pdf --format json -o "$tmpdir/raw.json"   # then extract tables (CSV default)
+lit parse ./financials.xlsx --format json -o "$tmpdir/raw.json"   # then extract -> ./tables/
+lit parse ./invoice.pdf --format json -o "$tmpdir/raw.json"   # then extract as JSON -> invoice-tables.json
+lit parse ./scan.pdf --format json --target-pages "1-3" -o "$tmpdir/raw.json"   # then extract tables as CSV
 ```
 
 ## Notes

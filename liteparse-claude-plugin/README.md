@@ -2,7 +2,9 @@
 
 Local document parsing via [LiteParse](https://github.com/run-llama/liteparse), packaged as a plugin for Claude Code, Claude Cowork, and OpenAI Codex. Repo name: **`liteparse-agent-skills-claude-codex`**.
 
-## Slash commands
+## Claude slash commands
+
+This package is the Claude plugin surface. For Codex, use the sibling `plugins/liteparse/` package and `$liteparse:...` skill names.
 
 | Command | Description |
 |---------|-------------|
@@ -15,7 +17,7 @@ Local document parsing via [LiteParse](https://github.com/run-llama/liteparse), 
 | `/liteparse:extract-structured <file> [--fields ... \| --schema ...] [--json\|--jsonl\|--csv] [-o output]` | Extract user-defined fields into repeatable structured output |
 | `/liteparse:convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
 
-The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook execution instructions.
+The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook schema notes.
 
 ## Structured extraction
 
@@ -31,18 +33,19 @@ An example reusable schema lives at [`examples/invoice.extract.json`](examples/i
 
 ## Post-parse hooks
 
-Define shell commands in `examples/liteparse.config.json` that run automatically after operations. Supported hooks:
+Define shell commands in `examples/liteparse.config.json` to describe post-operation hooks. Supported hooks:
 
 - `postParse` — after single file parse (`{{file}}`, `{{output}}`)
 - `postBatchParse` — after batch parse (`{{inputDir}}`, `{{outputDir}}`)
 - `postScreenshot` — after screenshot generation (`{{file}}`, `{{outputDir}}`)
 - `postConvert` — after format conversion (`{{file}}`, `{{output}}`)
 
-See the background `liteparse` skill for full hook documentation.
+The plugin documents this hook shape as configuration only. It should not implicitly execute repo-defined hook commands as part of a parse workflow. See the background `liteparse` skill for the hook schema and safety notes.
 
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback).
+- Optional: Python 3.12+ for Python SDK or custom OCR server packages.
 - Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`) or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
 - Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
 - Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).

@@ -2,7 +2,7 @@
 name: extract-tables
 description: Extract tables from a PDF, DOCX, XLSX, or PPTX file and output them as CSV or structured JSON. Use when pulling tabular data from documents for analysis, import, or downstream processing.
 argument-hint: "<file> [--csv | --json] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(libreoffice *) Bash(magick *) Bash(convert *) Bash(mkdir *)
+allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *) Bash(mkdir *)
 ---
 
 # Extract Tables
@@ -18,12 +18,13 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
    - Image files: verify `which magick || which convert`.
    - PDFs: no extra dependency.
 
-3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
 
-4. **Parse the file as JSON**. Create a unique temp file to avoid collisions with concurrent runs:
+4. **Create a per-run temp directory and parse the file as JSON**:
    ```bash
-   TMPFILE="$(mktemp /tmp/liteparse-tables-XXXXXX.json)"
-   <cli> parse <file> --format json -o "$TMPFILE"
+   tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-tables.XXXXXX")
+   trap 'rm -rf -- "$tmpdir"' EXIT
+   <cli> parse <file> --format json -o "$tmpdir/raw.json"
    ```
 
 5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Apply this detection order:
@@ -52,10 +53,7 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
      - CSV: write `<basename>-table-1.csv`, `<basename>-table-2.csv` next to the source file
      - JSON: write `<basename>-tables.json` next to the source file
 
-8. **Clean up** the temp file:
-   ```bash
-   rm -f "$TMPFILE"
-   ```
+8. **Clean up** the temp directory.
 
 9. **Report**:
    - Number of tables found

@@ -2,7 +2,7 @@
 name: merge-parsed
 description: Combine parsed output from multiple files into a single unified text or JSON document. Use after batch-parse or multiple parse-document runs, when consolidating a folder of parsed outputs, concatenating multiple LiteParse JSON files, merging split documents back together, or building a single corpus from many parsed sources.
 argument-hint: "<file1> <file2> [... fileN] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(cat *) Bash(ls *) Bash(mkdir *)
+allowed-tools: Read Write Bash(cat *) Bash(ls *) Bash(mkdir *)
 ---
 
 # Merge Parsed

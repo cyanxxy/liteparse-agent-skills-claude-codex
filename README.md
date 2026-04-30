@@ -12,24 +12,26 @@ Plugin for [Claude Code](https://code.claude.com), [Claude Cowork](https://claud
 - Compare two documents and produce a structured diff
 - Extract tables from documents into CSV or JSON
 - Convert between file formats via LibreOffice (DOCX to PDF, etc.)
-- Post-parse hooks for automating actions after operations
+- Post-operation hook metadata for downstream automation review
 
 Everything runs locally — no cloud dependency.
 
-## Slash commands
+## Claude commands and Codex skills
 
-| Command | Description |
+Claude Code exposes these as `/liteparse:...` slash commands. Codex exposes the same workflows through the skill picker or `$liteparse:...` skill mentions.
+
+| Workflow | Description |
 |---------|-------------|
-| `/liteparse:parse-document <file> [flags]` | Parse a single PDF, DOCX, XLSX, PPTX, image, or scan into text or JSON |
-| `/liteparse:batch-parse <input-dir> [output-dir] [flags]` | Parse every supported file in a directory |
-| `/liteparse:screenshot-document <file.pdf> [output-dir] [flags]` | Render PDF pages as PNG or JPG images |
-| `/liteparse:merge-parsed <files...> [-o output]` | Combine parsed outputs from multiple files into one document |
-| `/liteparse:compare-documents <file-a> <file-b> [-o diff]` | Parse two documents and produce a structured diff with summary |
-| `/liteparse:extract-tables <file> [--csv\|--json] [-o output]` | Extract tables from documents into CSV or structured JSON |
-| `/liteparse:extract-structured <file> [--fields ... \| --schema ...] [--json\|--jsonl\|--csv] [-o output]` | Extract user-defined fields into repeatable structured output |
-| `/liteparse:convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
+| `parse-document <file> [flags]` | Parse a single PDF, DOCX, XLSX, PPTX, image, or scan into text or JSON |
+| `batch-parse <input-dir> [output-dir] [flags]` | Parse every supported file in a directory |
+| `screenshot-document <file.pdf> [output-dir] [flags]` | Render PDF pages as PNG or JPG images |
+| `merge-parsed <files...> [-o output]` | Combine parsed outputs from multiple files into one document |
+| `compare-documents <file-a> <file-b> [-o diff]` | Parse two documents and produce a structured diff with summary |
+| `extract-tables <file> [--csv\|--json] [-o output]` | Extract tables from documents into CSV or structured JSON |
+| `extract-structured <file> [--fields ... \| --schema ...] [--json\|--jsonl\|--csv] [-o output]` | Extract user-defined fields into repeatable structured output |
+| `convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
 
-The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook execution instructions.
+The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook schema notes.
 
 ## Repo layout
 
@@ -119,7 +121,7 @@ npx skills add cyanxxy/liteparse-agent-skills-claude-codex --skill compare-docum
 
 ## Post-parse hooks
 
-Define shell commands in `liteparse.config.json` that run automatically after operations:
+Define shell commands in `liteparse.config.json` to describe post-operation hooks:
 
 ```json
 {
@@ -128,11 +130,10 @@ Define shell commands in `liteparse.config.json` that run automatically after op
   "outputFormat": "json",
   "hooks": {
     "postParse": [
-      "echo 'Parsed: {{file}} -> {{output}}'",
-      "git add '{{output}}'"
+      "echo Parsed '{{file}}' to '{{output}}'"
     ],
     "postBatchParse": [
-      "curl -s -X POST https://api.example.com/notify --data-urlencode 'dir={{outputDir}}'"
+      "echo Batch complete for '{{inputDir}}' into '{{outputDir}}'"
     ],
     "postScreenshot": [
       "echo 'Screenshots saved to {{outputDir}}'"
@@ -151,13 +152,14 @@ Define shell commands in `liteparse.config.json` that run automatically after op
 | `postScreenshot` | After screenshot generation | `{{file}}`, `{{outputDir}}` |
 | `postConvert` | After format conversion | `{{file}}`, `{{output}}` |
 
-Hooks run via `bash -c` with `{{...}}` template variables substituted as raw strings before execution. **Always single-quote template variables** in your hook commands (e.g. `'{{file}}'`, `'{{outputDir}}'`) — otherwise a filename containing spaces or shell metacharacters will break the command or inject arbitrary shell. Before substitution, escape `'` in each value by replacing it with `'\''` to prevent single-quote breakout. Never embed passwords or secrets in hook commands — they are visible in `ps` output and may be logged. Failed hooks are reported but don't roll back the operation.
+The plugin treats these hooks as configuration data. It should not auto-discover or execute repo-defined hook commands during parse, batch, screenshot, or convert workflows. If a user explicitly wants to run one of these commands, review it as ordinary shell automation first; template variables are raw string substitutions and remain an injection/correctness risk when paths contain quotes or shell metacharacters. Do not embed passwords or secrets in hook commands; they can be visible in process lists and logs.
 
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback)
+- Optional: Python 3.12+ for Python SDK or custom OCR server packages
 - Optional: `lit` installed globally (`npm i -g @llamaindex/liteparse`, or `brew tap run-llama/liteparse && brew install llamaindex-liteparse`)
-- Optional: LibreOffice (for Office formats and `/liteparse:convert-format`)
+- Optional: LibreOffice (for Office formats and the convert-format workflow)
 - Optional: ImageMagick (for image inputs)
 - Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs), `LITEPARSE_TMPDIR` (custom temp directory)
 

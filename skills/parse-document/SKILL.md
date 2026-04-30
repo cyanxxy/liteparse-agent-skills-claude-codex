@@ -1,7 +1,7 @@
 ---
 name: parse-document
 description: Parse a single PDF, DOCX, XLSX, PPTX, image, or scanned file locally with LiteParse. Use when extracting text or JSON from one document, pulling specific pages out of a file, or running OCR on a scan.
-compatibility: Requires Node 18+ and `@llamaindex/liteparse`. LibreOffice for Office files. ImageMagick for images.
+compatibility: Requires Node 18+ and either an installed `lit`/`liteparse` binary or `npm` for the `npx` fallback. LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:
   author: Local Workspace
@@ -19,12 +19,12 @@ Parse a single file with LiteParse, applying any additional flags the user suppl
    - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
    - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
    - PDFs: no extra dependency.
-3. **Choose the CLI**: run `which lit`. If it succeeds, use `lit parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
+3. **Choose the CLI**: run `which lit || which liteparse`. If either succeeds, use that binary as `<cli>` and run `<cli> parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
 4. **Run the parse** with any additional flags the user provided. Respect any of: `--format json|text`, `-o <file>`, `--target-pages "1-5"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--password <pw>`, `--config <file>`, `-q`.
 5. **Default output placement**:
    - If the user did not pass `-o`, the CLI writes to stdout. Show a preview capped at **the first 50 lines or 4,000 characters, whichever comes first**. If the output exceeds that, show the preview, append `… [truncated: showed N of M lines]`, and suggest rerunning with `-o <file>` to write the full output.
    - When JSON was requested and no `-o` was given, **always** write to a file (JSON is not pleasant to read in a preview) — default to the source file's directory with a `.liteparse.json` suffix, then show the first ~40 lines of that file as a preview.
-6. **Post-parse hooks**: if a `liteparse.config.json` exists (passed via `--config` or found at the project root) and contains `hooks.postParse`, execute each command in the array after a successful parse. Substitute `{{file}}` with the input path and `{{output}}` with the output path before running via `bash -c`. Report hook results. If a hook fails, report the error but do not roll back the parse output. Show the user what hooks will run before first execution.
+6. **Config files**: if the user passed `--config <file>`, report which config file was used. Do not inspect or execute `hooks.*` entries as part of this workflow.
 7. **Report**:
    - the exact file parsed,
    - key flags used,

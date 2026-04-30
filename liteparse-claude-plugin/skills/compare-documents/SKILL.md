@@ -2,7 +2,7 @@
 name: compare-documents
 description: Parse two documents and produce a structured diff showing what changed between them. Use for diffing contract versions, comparing resume revisions, reviewing spec updates, redline reviews, seeing what changed between two PDFs or Word files, or any "what's different between these two files" request.
 argument-hint: "<file-a> <file-b>"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(npx *) Bash(diff *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
+allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse *) Bash(diff *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---
 
 # Compare Documents
@@ -19,35 +19,36 @@ Parse two documents with LiteParse and diff their text content.
    - PDFs: no extra dependency.
    Stop and report if a required tool is missing.
 
-3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
 
-4. **Parse both files** to text. Create unique temp files to avoid collisions with concurrent runs:
+4. **Create a per-run temp directory**:
    ```bash
-   TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)"
-   TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
-   <cli> parse <file-a> --format text -o "$TMPA"
-   <cli> parse <file-b> --format text -o "$TMPB"
+   tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-compare.XXXXXX")
+   trap 'rm -rf -- "$tmpdir"' EXIT
    ```
 
-5. **Diff the parsed text**:
+5. **Parse both files** to text. Run two parse commands:
    ```bash
-   diff -u "$TMPA" "$TMPB"
+   <cli> parse <file-a> --format text -o "$tmpdir/a.txt"
+   <cli> parse <file-b> --format text -o "$tmpdir/b.txt"
+   ```
+
+6. **Diff the parsed text**:
+   ```bash
+   diff -u "$tmpdir/a.txt" "$tmpdir/b.txt"
    ```
    If `diff` reports no differences, tell the user the documents are textually identical.
 
-6. **Produce a summary**. After showing the raw diff, provide a concise human-readable summary:
+7. **Produce a summary**. After showing the raw diff, provide a concise human-readable summary:
    - Sections added, removed, or modified
    - Key content changes (numbers, names, dates, clauses)
    - Approximate scale of change (minor edits vs. major rewrite)
 
-7. **Optional output file**. If the user passed `-o <path>` in `$ARGUMENTS`, write the unified diff to that path and report it.
+8. **Optional output file**. If the user passed `-o <path>` in `$ARGUMENTS`, write the unified diff to that path and report it.
 
-8. **Clean up** the temp files:
-   ```bash
-   rm -f "$TMPA" "$TMPB"
-   ```
+9. **Clean up** the temp directory.
 
-9. **Report**:
+10. **Report**:
    - The two files compared
    - Whether they differ or are identical
    - The diff and summary (or output path if written to file)

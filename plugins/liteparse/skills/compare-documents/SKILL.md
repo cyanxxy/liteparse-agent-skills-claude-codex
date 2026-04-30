@@ -17,35 +17,36 @@ Parse two documents with LiteParse and diff their text content.
    - PDFs: no extra dependency.
    Stop and report if a required tool is missing.
 
-3. **Choose the CLI**: run `which lit`. If it exists, use `lit parse`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
 
-4. **Parse both files** to text. Create unique temp files to avoid collisions with concurrent runs:
+4. **Create a per-run temp directory**:
    ```bash
-   TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)"
-   TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
-   <cli> parse <file-a> --format text -o "$TMPA"
-   <cli> parse <file-b> --format text -o "$TMPB"
+   tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-compare.XXXXXX")
+   trap 'rm -rf -- "$tmpdir"' EXIT
    ```
 
-5. **Diff the parsed text**:
+5. **Parse both files** to text. Run two parse commands:
    ```bash
-   diff -u "$TMPA" "$TMPB"
+   <cli> parse <file-a> --format text -o "$tmpdir/a.txt"
+   <cli> parse <file-b> --format text -o "$tmpdir/b.txt"
+   ```
+
+6. **Diff the parsed text**:
+   ```bash
+   diff -u "$tmpdir/a.txt" "$tmpdir/b.txt"
    ```
    If `diff` reports no differences, tell the user the documents are textually identical.
 
-6. **Produce a summary**. After showing the raw diff, provide a concise human-readable summary:
+7. **Produce a summary**. After showing the raw diff, provide a concise human-readable summary:
    - Sections added, removed, or modified
    - Key content changes (numbers, names, dates, clauses)
    - Approximate scale of change (minor edits vs. major rewrite)
 
-7. **Optional output file**. If the user passed `-o <path>` as an additional flag, write the unified diff to that path and report it.
+8. **Optional output file**. If the user passed `-o <path>` as an additional flag, write the unified diff to that path and report it.
 
-8. **Clean up** the temp files:
-   ```bash
-   rm -f "$TMPA" "$TMPB"
-   ```
+9. **Clean up** the temp directory.
 
-9. **Report**:
+10. **Report**:
    - The two files compared
    - Whether they differ or are identical
    - The diff and summary (or output path if written to file)
@@ -54,13 +55,9 @@ Parse two documents with LiteParse and diff their text content.
 ## Examples
 
 ```bash
-# Compare two contract versions
-TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)" && TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
-lit parse ./contracts/v1.pdf --format text -o "$TMPA" && lit parse ./contracts/v2.pdf --format text -o "$TMPB" && diff -u "$TMPA" "$TMPB"; rm -f "$TMPA" "$TMPB"
-
-# Compare resumes and save diff to file
-TMPA="$(mktemp /tmp/liteparse-compare-a-XXXXXX.txt)" && TMPB="$(mktemp /tmp/liteparse-compare-b-XXXXXX.txt)"
-lit parse ./resume-old.docx --format text -o "$TMPA" && lit parse ./resume-new.docx --format text -o "$TMPB" && diff -u "$TMPA" "$TMPB" > changes.diff; rm -f "$TMPA" "$TMPB"
+tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-compare.XXXXXX") && trap 'rm -rf -- "$tmpdir"' EXIT
+lit parse ./contracts/v1.pdf --format text -o "$tmpdir/a.txt" && lit parse ./contracts/v2.pdf --format text -o "$tmpdir/b.txt" && diff -u "$tmpdir/a.txt" "$tmpdir/b.txt"
+lit parse ./resume-old.docx --format text -o "$tmpdir/a.txt" && lit parse ./resume-new.docx --format text -o "$tmpdir/b.txt" && diff -u "$tmpdir/a.txt" "$tmpdir/b.txt" > changes.diff
 ```
 
 For CLI flag details and dependency rules, see the background `liteparse` skill.

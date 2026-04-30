@@ -14,16 +14,17 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
    - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
    - PDFs: no extra dependency.
-3. **Choose the CLI**: run `which lit`. If it succeeds, use `lit parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
+3. **Choose the CLI**: run `which lit || which liteparse`. If either succeeds, use that binary as `<cli>` and run `<cli> parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
 4. **Decide the extraction schema** (precedence: `--schema` > `--fields` > ask):
    - If the user passed `--schema <file>`, read that file and treat it as the stable contract for this run. If `--fields` was also passed, the schema wins — note the ignored `--fields` in the final report so the user can resolve it.
    - Otherwise, if the user passed `--fields`, normalize the loose request into a canonical schema before extracting. Default inferred fields to optional single-value `string` fields and generate stable `snake_case` names when the user does not provide one.
    - If neither was provided, ask the user which fields they want extracted.
    - Always go through normalization before extracting, even for a single field. That is what lets repeat runs against similar inputs produce the same shape.
-5. **Parse the file as JSON**. Create a unique temp file to avoid collisions with concurrent runs:
+5. **Create a per-run temp directory and parse the file as JSON**:
    ```bash
-   TMPFILE="$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
-   <cli> parse <file> --format json -o "$TMPFILE"
+   tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-structured.XXXXXX")
+   trap 'rm -rf -- "$tmpdir"' EXIT
+   <cli> parse <file> --format json -o "$tmpdir/raw.json"
    ```
 6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns.
 
@@ -48,10 +49,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - If the user passed `-o <path>`, write there.
    - Otherwise write `<basename>-extracted.<ext>` next to the source file.
    - If `--save-schema <file>` was requested, write the normalized schema to that path so the user can reuse it later as a stable automation contract. When the source was already `--schema <src>`, the saved file is a re-serialized canonical copy; if `--save-schema` resolves to the same path as `<src>`, skip the write and say so in the report.
-9. **Clean up** the temp file:
-   ```bash
-   rm -f "$TMPFILE"
-   ```
+9. **Clean up** the temp directory.
 10. **Report**:
     - the exact file parsed,
     - the schema source used (`--fields` or `--schema`),
@@ -87,21 +85,10 @@ Schemas loaded via `--schema` and written via `--save-schema` share the shape sh
 ## Examples
 
 ```bash
-# Extract inline fields — agent creates a temp file, extracts, then cleans up
-lit parse ./invoice.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
-# then extract: invoice number, invoice date, total amount
-
-# Extract using a saved schema
-lit parse ./invoice.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
-# then extract using ./invoice.extract.json -> invoice-extracted.json
-
-# Extract with typed fields and JSONL output
-lit parse ./contracts/master.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
-# then extract: party name:string, effective date:date, governing law:string -> JSONL
-
-# Extract and save the schema for reuse
-lit parse ./receipts/receipt.pdf --format json -o "$(mktemp /tmp/liteparse-structured-XXXXXX.json)"
-# then extract: merchant name, subtotal, total; save schema to ./schemas/receipt.extract.json
+$liteparse:extract-structured ./invoice.pdf --fields "invoice number:string, invoice date:date, total amount:number"
+$liteparse:extract-structured ./invoice.pdf --schema /path/to/invoice.extract.json -o ./invoice-extracted.json
+$liteparse:extract-structured ./contracts/master.pdf --fields "party name:string, effective date:date, governing law:string" --jsonl -o ./contracts-extracted.jsonl
+$liteparse:extract-structured ./receipts/receipt.pdf --fields "merchant name:string, subtotal:number, total:number" --save-schema ./schemas/receipt.extract.json
 ```
 
 For details on CLI flags and dependency rules, see the background `liteparse` skill.
