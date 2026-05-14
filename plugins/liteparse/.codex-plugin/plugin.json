@@ -1,7 +1,7 @@
 {
   "name": "liteparse",
   "version": "0.2.0",
-  "description": "Local LiteParse skill for document parsing, OCR, and PDF screenshots.",
+  "description": "Local LiteParse skills for document parsing.",
   "author": {
     "name": "Local Workspace"
   },
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "LiteParse",
     "shortDescription": "Parse documents locally with OCR support",
-    "longDescription": "Use LiteParse inside Codex to parse PDFs, Office files, and images locally. Extract text or JSON, run OCR on scans, and generate PDF page screenshots without cloud dependencies.",
+    "longDescription": "Use LiteParse inside Codex to parse PDFs, Office files, images, and scans locally. Includes OCR, screenshots, table extraction, structured fields, merging, comparisons, and conversion workflows.",
     "developerName": "Local Workspace",
     "category": "Productivity",
     "capabilities": [
@@ -31,9 +31,9 @@
     "privacyPolicyURL": "https://www.llamaindex.ai/files/privacy-notice.pdf",
     "termsOfServiceURL": "https://www.llamaindex.ai/files/terms-of-service.pdf",
     "defaultPrompt": [
-      "Parse this PDF into JSON with OCR if needed.",
-      "Batch parse this contracts folder into text output.",
-      "Generate screenshots for pages 1-3 of this PDF."
+      "Parse a PDF to JSON.",
+      "Batch parse a folder.",
+      "Screenshot PDF pages."
     ],
     "brandColor": "#2563EB"
   }

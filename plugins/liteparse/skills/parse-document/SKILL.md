@@ -1,39 +1,19 @@
 ---
 name: parse-document
-description: Parse a single PDF, DOCX, XLSX, PPTX, image, or scanned file locally with LiteParse. Use when extracting text or JSON from one document, pulling specific pages out of a file, or running OCR on a scan.
+description: Use when parsing one document with LiteParse.
 ---
 
 # Parse Document
 
-Parse a single file with LiteParse, applying any additional flags the user supplies.
+Parse one local file to text or JSON.
 
-## Steps
+## Workflow
 
-1. **Resolve the file path** relative to the project root. If it is missing or ambiguous, ask the user for the correct path. If the user passed no arguments at all, ask for a file path.
-2. **Check file-type dependencies**:
-   - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
-   - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
-   - PDFs: no extra dependency.
-3. **Choose the CLI**: run `which lit || which liteparse`. If either succeeds, use that binary as `<cli>` and run `<cli> parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
-4. **Run the parse** with any additional flags the user provided. Respect any of: `--format json|text`, `-o <file>`, `--target-pages "1-5"`, `--no-ocr`, `--ocr-server-url <url>`, `--ocr-language <lang>`, `--dpi <n>`, `--password <pw>`, `--config <file>`, `-q`.
-5. **Default output placement**:
-   - If the user did not pass `-o`, the CLI writes to stdout. Show a preview capped at **the first 50 lines or 4,000 characters, whichever comes first**. If the output exceeds that, show the preview, append `… [truncated: showed N of M lines]`, and suggest rerunning with `-o <file>` to write the full output.
-   - When JSON was requested and no `-o` was given, **always** write to a file (JSON is not pleasant to read in a preview) — default to the source file's directory with a `.liteparse.json` suffix, then show the first ~40 lines of that file as a preview.
-6. **Config files**: if the user passed `--config <file>`, report which config file was used. Do not inspect or execute `hooks.*` entries as part of this workflow.
-7. **Report**:
-   - the exact file parsed,
-   - key flags used,
-   - output path if written to a file, otherwise a preview of stdout,
-   - any dependency error or non-zero exit verbatim (do not paraphrase).
+1. Resolve the file path; ask only if missing or ambiguous.
+2. Check dependencies: LibreOffice for Office files, ImageMagick for images, none for PDFs.
+3. Use `lit` or `liteparse`; otherwise run `npx -y @llamaindex/liteparse parse`.
+4. Preserve user flags such as `--format`, `-o`, pages, OCR, DPI, password, config, and quiet mode.
+5. For JSON without `-o`, write `<source>.liteparse.json`. For text stdout, preview at most 50 lines or 4,000 characters.
+6. Report input, flags, output or preview, and exact errors.
 
-## Examples
-
-```bash
-lit parse ./docs/report.pdf --format json
-lit parse ./contracts/master.docx --no-ocr
-lit parse ./scans/invoice.pdf --ocr-server-url http://localhost:8828/ocr --target-pages "1-2"
-lit parse ./slides.pptx --format text -o slides.txt
-lit parse /Users/alice/Downloads/lease-agreement.pdf --format json -o ~/parsed/lease.json   # absolute paths work too
-```
-
-For details on CLI flags and dependency rules, see the background `liteparse` skill.
+More details: [workflow](references/workflow.md), [CLI reference](../liteparse/references/cli-reference.md).

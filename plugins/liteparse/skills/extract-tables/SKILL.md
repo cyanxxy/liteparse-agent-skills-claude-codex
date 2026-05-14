@@ -1,78 +1,19 @@
 ---
 name: extract-tables
-description: Extract tables from a PDF, DOCX, XLSX, or PPTX file and output them as CSV or structured JSON. Use when pulling tabular data from documents for analysis, import, or downstream processing.
+description: Use when extracting document tables.
 ---
 
 # Extract Tables
 
-Parse a document with LiteParse in JSON mode and extract tabular data into CSV or structured JSON.
+Extract tables to CSV or JSON.
 
-## Steps
+## Workflow
 
-1. **Resolve the input file path**. If no file was provided, ask for one.
+1. Resolve the file and check dependencies for its type.
+2. Use `lit` or `liteparse`; otherwise run `npx -y @llamaindex/liteparse`.
+3. Parse as JSON into a temp directory.
+4. Prefer native `type: table`; otherwise use deterministic grid heuristics.
+5. Write CSV by default or JSON with `--json`; honor `-o`.
+6. Report table count, rows/columns, paths, and errors.
 
-2. **Check file-type dependencies**:
-   - Office files: verify `which libreoffice`.
-   - Image files: verify `which magick || which convert`.
-   - PDFs: no extra dependency.
-
-3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
-
-4. **Create a per-run temp directory and parse the file as JSON**:
-   ```bash
-   tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-tables.XXXXXX")
-   trap 'rm -rf -- "$tmpdir"' EXIT
-   <cli> parse <file> --format json -o "$tmpdir/raw.json"
-   ```
-
-5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Apply this detection order:
-
-   **(a) Native tables first.** If the JSON contains items with `"type": "table"`, use them directly — these already have rows and cells resolved by LiteParse. Skip heuristic detection for these regions.
-
-   **(b) Heuristic grid detection** (only for pages that had no `type: table` items):
-   - **Column detection**: Cluster text items by their `bbox` x-start coordinate. Two items belong to the same column if their x-starts differ by ≤ 5% of page width (or ≤ 10px on 150 DPI renders). A column must have ≥ 3 aligned items to count.
-   - **Row detection**: Within a candidate column cluster, sort items by y-coordinate. Two items belong to the same row if their y-centers differ by ≤ 0.5 × median line height on the page.
-   - **Minimum table size**: Require ≥ 2 columns and ≥ 2 rows (the header row counts). Discard anything smaller as running text.
-   - **Header detection**: Treat the top row as the header if (1) its text items are bold/larger than the body rows, or (2) the row below contains primarily numeric values while the top row is textual.
-
-   **(c) Deterministic ordering**: Emit tables in reading order — page number ascending, then by top-left y-coordinate ascending. This keeps output stable across runs.
-
-   If neither (a) nor (b) produces any result on a page, do not fabricate a table — proceed to the next page.
-
-6. **Determine output format** from the additional flags:
-   - `--csv` (default if not specified): write each table as a separate CSV file
-   - `--json`: write all tables as a JSON array of objects with headers as keys
-
-7. **Write output**:
-   - If the user passed `-o <path>`:
-     - For CSV with multiple tables: treat `<path>` as a directory and write `table-1.csv`, `table-2.csv`, etc.
-     - For JSON or single-table CSV: write directly to `<path>`
-   - Otherwise:
-     - CSV: write `<basename>-table-1.csv`, `<basename>-table-2.csv` next to the source file
-     - JSON: write `<basename>-tables.json` next to the source file
-
-8. **Clean up** the temp directory.
-
-9. **Report**:
-   - Number of tables found
-   - Rows and columns per table
-   - Output path(s)
-   - If no tables were detected, say so clearly and suggest the document may not contain tabular data, or that OCR quality may be insufficient
-
-## Examples
-
-```bash
-tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/liteparse-tables.XXXXXX") && trap 'rm -rf -- "$tmpdir"' EXIT
-lit parse ./report.pdf --format json -o "$tmpdir/raw.json"   # then extract tables (CSV default)
-lit parse ./financials.xlsx --format json -o "$tmpdir/raw.json"   # then extract -> ./tables/
-lit parse ./invoice.pdf --format json -o "$tmpdir/raw.json"   # then extract as JSON -> invoice-tables.json
-lit parse ./scan.pdf --format json --target-pages "1-3" -o "$tmpdir/raw.json"   # then extract tables as CSV
-```
-
-## Notes
-
-- Table extraction quality depends on the document structure. Well-formatted PDFs with explicit table borders yield the best results.
-- For scanned documents, ensure OCR is enabled (it is by default).
-- XLSX files already contain structured data — for these, LiteParse extracts sheet content directly, which typically produces cleaner table output.
-- **Merged cells**: when a cell visually spans multiple columns or rows, emit the value in its top-left cell and leave the spanned cells empty (`""`). Note the merge in the report if you want the consumer to know.
-- **Multi-row headers**: if two consecutive rows both look header-like, concatenate them as `"<parent> - <child>"` column names (e.g. `"Q1 - Revenue"`).
+More details: [workflow](references/workflow.md), [CLI reference](../liteparse/references/cli-reference.md).
