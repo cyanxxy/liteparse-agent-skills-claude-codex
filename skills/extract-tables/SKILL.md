@@ -1,11 +1,11 @@
 ---
 name: extract-tables
 description: Extract tables from a PDF, DOCX, XLSX, or PPTX file and output them as CSV or structured JSON. Use when pulling tabular data from documents for analysis, import, or downstream processing.
-compatibility: Requires Node 18+ and either an installed `lit`/`liteparse` binary or `npm` for the `npx` fallback. LibreOffice for Office files. ImageMagick for images.
+compatibility: Requires LiteParse v2 via `lit`/`liteparse` or Node 18+ with npm for the `npx` fallback. LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:
   author: Local Workspace
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Extract Tables
@@ -30,19 +30,16 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
    <cli> parse <file> --format json -o "$tmpdir/raw.json"
    ```
 
-5. **Extract tables from the JSON output**. Read the parsed JSON and look for table structures. LiteParse JSON output contains page-level items with type and bounding-box metadata. Apply this detection order:
+5. **Extract tables from the JSON output**. LiteParse v2 JSON contains page text plus positioned `text_items` (Rust/Python) or `textItems` (npm wrapper). It does not expose native table objects, so use heuristic grid detection:
 
-   **(a) Native tables first.** If the JSON contains items with `"type": "table"`, use them directly — these already have rows and cells resolved by LiteParse. Skip heuristic detection for these regions.
-
-   **(b) Heuristic grid detection** (only for pages that had no `type: table` items):
-   - **Column detection**: Cluster text items by their `bbox` x-start coordinate. Two items belong to the same column if their x-starts differ by ≤ 5% of page width (or ≤ 10px on 150 DPI renders). A column must have ≥ 3 aligned items to count.
+   - **Column detection**: Cluster text items by their `x` coordinate. Two items belong to the same column if their x-starts differ by <= 5% of page width (or <= 10px on 150 DPI renders). A column must have >= 3 aligned items to count.
    - **Row detection**: Within a candidate column cluster, sort items by y-coordinate. Two items belong to the same row if their y-centers differ by ≤ 0.5 × median line height on the page.
-   - **Minimum table size**: Require ≥ 2 columns and ≥ 2 rows (the header row counts). Discard anything smaller as running text.
+   - **Minimum table size**: Require >= 2 columns and >= 2 rows (the header row counts). Discard anything smaller as running text.
    - **Header detection**: Treat the top row as the header if (1) its text items are bold/larger than the body rows, or (2) the row below contains primarily numeric values while the top row is textual.
 
-   **(c) Deterministic ordering**: Emit tables in reading order — page number ascending, then by top-left y-coordinate ascending. This keeps output stable across runs.
+   **Deterministic ordering**: Emit tables in reading order — page number ascending, then by top-left y-coordinate ascending. This keeps output stable across runs.
 
-   If neither (a) nor (b) produces any result on a page, do not fabricate a table — proceed to the next page.
+   If no stable grid is found on a page, do not fabricate a table — proceed to the next page.
 
 6. **Determine output format** from the additional flags:
    - `--csv` (default if not specified): write each table as a separate CSV file

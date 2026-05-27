@@ -1,6 +1,6 @@
 # LiteParse plugin for Claude Code, Cowork & Codex
 
-Local document parsing via [LiteParse](https://github.com/run-llama/liteparse), packaged as a plugin for Claude Code, Claude Cowork, and OpenAI Codex. Repo name: **`liteparse-agent-skills-claude-codex`**.
+Local document parsing via [LiteParse v2](https://github.com/run-llama/liteparse), packaged as a plugin for Claude Code, Claude Cowork, and OpenAI Codex. Repo name: **`liteparse-agent-skills-claude-codex`**.
 
 ## Claude slash commands
 
@@ -10,14 +10,14 @@ This package is the Claude plugin surface. For Codex, use the sibling `plugins/l
 |---------|-------------|
 | `/liteparse:parse-document <file> [flags]` | Parse a single PDF, DOCX, XLSX, PPTX, image, or scan into text or JSON |
 | `/liteparse:batch-parse <input-dir> [output-dir] [flags]` | Parse every supported file in a directory |
-| `/liteparse:screenshot-document <file.pdf> [output-dir] [flags]` | Render PDF pages as PNG or JPG images |
+| `/liteparse:screenshot-document <file> [output-dir] [flags]` | Render document pages as PNG images |
 | `/liteparse:merge-parsed <files...> [-o output]` | Combine parsed outputs from multiple files into one document |
 | `/liteparse:compare-documents <file-a> <file-b> [-o diff]` | Parse two documents and produce a structured diff with summary |
 | `/liteparse:extract-tables <file> [--csv\|--json] [-o output]` | Extract tables from documents into CSV or structured JSON |
 | `/liteparse:extract-structured <file> [--fields ... \| --schema ...] [--json\|--jsonl\|--csv] [-o output]` | Extract user-defined fields into repeatable structured output |
 | `/liteparse:convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
 
-The background `liteparse` skill loads automatically and provides CLI reference, dependency rules, config file docs, and hook schema notes.
+The background `liteparse` skill loads automatically and provides LiteParse v2 CLI reference, dependency rules, JSON output shape, and failure handling.
 
 ## Structured extraction
 
@@ -31,25 +31,14 @@ Use `--save-schema <file>` when you want to persist the normalized recipe as a r
 
 An example reusable schema lives at [`examples/invoice.extract.json`](examples/invoice.extract.json).
 
-## Post-parse hooks
-
-Define shell commands in `examples/liteparse.config.json` to describe post-operation hooks. Supported hooks:
-
-- `postParse` — after single file parse (`{{file}}`, `{{output}}`)
-- `postBatchParse` — after batch parse (`{{inputDir}}`, `{{outputDir}}`)
-- `postScreenshot` — after screenshot generation (`{{file}}`, `{{outputDir}}`)
-- `postConvert` — after format conversion (`{{file}}`, `{{output}}`)
-
-The plugin documents this hook shape as configuration only. It should not implicitly execute repo-defined hook commands as part of a parse workflow. See the background `liteparse` skill for the hook schema and safety notes.
-
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback).
 - Optional: Python 3.12+ for Python SDK or custom OCR server packages.
-- Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`) or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
+- Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`), Python (`pip install liteparse`), Rust (`cargo install liteparse`), or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
 - Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
 - Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).
-- Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs), `LITEPARSE_TMPDIR` (custom temp directory).
+- Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs).
 
 If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse`.
 
@@ -75,7 +64,6 @@ liteparse-claude-plugin/
 ├── LICENSE
 ├── README.md
 ├── examples/
-│   ├── liteparse.config.json
 │   └── invoice.extract.json
 └── skills/
     ├── liteparse/SKILL.md              # reference knowledge (auto-load)
@@ -91,7 +79,7 @@ liteparse-claude-plugin/
 
 ## Credits
 
-Built on [LiteParse](https://github.com/run-llama/liteparse) by the [LlamaIndex](https://www.llamaindex.ai/) team. All document parsing, OCR, and screenshot functionality comes from their work.
+Built on [LiteParse v2](https://github.com/run-llama/liteparse) by the [LlamaIndex](https://www.llamaindex.ai/) team. All document parsing, OCR, and screenshot functionality comes from their work.
 
 - [LiteParse repo](https://github.com/run-llama/liteparse)
 - [LiteParse docs](https://developers.llamaindex.ai/liteparse/)

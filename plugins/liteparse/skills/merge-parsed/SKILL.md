@@ -1,6 +1,6 @@
 ---
 name: merge-parsed
-description: Use when merging LiteParse outputs.
+description: Use when merging LiteParse text or JSON outputs into one file.
 ---
 
 # Merge Parsed

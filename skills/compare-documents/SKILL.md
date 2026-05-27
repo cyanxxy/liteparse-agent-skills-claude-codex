@@ -1,11 +1,11 @@
 ---
 name: compare-documents
 description: Parse two documents and produce a structured diff showing what changed between them. Use for diffing contract versions, comparing resume revisions, reviewing spec updates, redline reviews, seeing what changed between two PDFs or Word files, or any "what's different between these two files" request.
-compatibility: Requires Node 18+ and either an installed `lit`/`liteparse` binary or `npm` for the `npx` fallback. LibreOffice for Office files. ImageMagick for images.
+compatibility: Requires LiteParse v2 via `lit`/`liteparse` or Node 18+ with npm for the `npx` fallback. LibreOffice for Office files. ImageMagick for images.
 license: Apache-2.0
 metadata:
   author: Local Workspace
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Compare Documents

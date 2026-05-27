@@ -1,6 +1,6 @@
 ---
 name: extract-structured
-description: Use when extracting named document fields.
+description: Use when extracting named fields from documents into JSON, JSONL, or CSV.
 ---
 
 # Extract Structured

@@ -1,6 +1,6 @@
 # LiteParse for Codex
 
-Codex plugin from the [`liteparse-agent-skills-claude-codex`](https://github.com/cyanxxy/liteparse-agent-skills-claude-codex) repo. Packages LiteParse as a set of reusable Codex skills for local document parsing, OCR, PDF screenshots, and structured extraction.
+Codex plugin from the [`liteparse-agent-skills-claude-codex`](https://github.com/cyanxxy/liteparse-agent-skills-claude-codex) repo. Packages LiteParse v2 as a set of reusable Codex skills for local document parsing, OCR, PNG screenshots, and structured extraction.
 
 ## Codex skills
 
@@ -10,14 +10,14 @@ Use the Codex skill picker or mention the skill by name with `$...`.
 |---------|-------------|
 | `$liteparse:parse-document <file> [flags]` | Parse a single PDF, DOCX, XLSX, PPTX, image, or scan into text or JSON |
 | `$liteparse:batch-parse <input-dir> [output-dir] [flags]` | Parse every supported file in a directory |
-| `$liteparse:screenshot-document <file.pdf> -o <output-dir> [flags]` | Render PDF pages as PNG or JPG images |
+| `$liteparse:screenshot-document <file> [output-dir] [flags]` | Render document pages as PNG images |
 | `$liteparse:merge-parsed <files...> [-o output]` | Combine parsed outputs from multiple files into one document |
 | `$liteparse:compare-documents <file-a> <file-b> [-o diff]` | Parse two documents and produce a structured diff with summary |
 | `$liteparse:extract-tables <file> [--csv\|--json] [-o output]` | Extract tables from documents into CSV or structured JSON |
 | `$liteparse:extract-structured <file> [--fields ... \| --schema ...] [--json\|--jsonl\|--csv] [-o output]` | Extract user-defined fields into repeatable structured output |
 | `$liteparse:convert-format <file> --to <format> [-o output]` | Convert between file formats via LibreOffice (no parsing) |
 
-The background `liteparse` skill loads automatically as reference material and provides CLI reference, dependency rules, config file docs, and hook schema notes.
+The background `liteparse` skill loads automatically as reference material and provides LiteParse v2 CLI reference, dependency rules, JSON output shape, and failure handling.
 
 ## Structured extraction
 
@@ -30,25 +30,14 @@ JSON is the source of truth; `--jsonl` and `--csv` are flattened export views fo
 
 An example reusable schema lives at [`examples/invoice.extract.json`](examples/invoice.extract.json).
 
-## Post-parse hooks
-
-Define shell commands in `examples/liteparse.config.json` to describe post-operation hooks. Supported hooks:
-
-- `postParse` — after single file parse (`{{file}}`, `{{output}}`)
-- `postBatchParse` — after batch parse (`{{inputDir}}`, `{{outputDir}}`)
-- `postScreenshot` — after screenshot generation (`{{file}}`, `{{outputDir}}`)
-- `postConvert` — after format conversion (`{{file}}`, `{{output}}`)
-
-The Codex plugin documents this hook shape as configuration only. It should not implicitly execute repo-defined hook commands as part of a parse workflow. See the background `liteparse` skill for the hook schema and safety notes.
-
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback).
 - Optional: Python 3.12+ for Python SDK or custom OCR server packages.
-- Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`) or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
+- Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`), Python (`pip install liteparse`), Rust (`cargo install liteparse`), or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
 - Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
 - Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).
-- Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs), `LITEPARSE_TMPDIR` (custom temp directory).
+- Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs).
 
 If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse`.
 
@@ -64,7 +53,6 @@ plugins/liteparse/
 ├── LICENSE
 ├── README.md
 ├── examples/
-│   ├── liteparse.config.json
 │   └── invoice.extract.json
 └── skills/
     ├── liteparse/SKILL.md              # reference knowledge (auto-load)

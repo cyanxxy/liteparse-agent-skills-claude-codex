@@ -5,7 +5,7 @@ compatibility: Requires LibreOffice installed and on PATH.
 license: Apache-2.0
 metadata:
   author: Local Workspace
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Convert Format
@@ -42,16 +42,14 @@ Convert a document from one format to another using LibreOffice's headless conve
    ```
    LibreOffice writes to `--outdir` with the original basename and new extension.
 
-6. **Rename if needed**. If the user specified a custom `-o <path>` that differs from LibreOffice's default output name, rename the output **before** running hooks so `{{output}}` always refers to the final path the user will see:
+6. **Rename if needed**. If the user specified a custom `-o <path>` that differs from LibreOffice's default output name, rename the output before reporting so the final path is the one the user will see:
    ```bash
    mv "<libreoffice-output>" "<user-output>"
    ```
 
 7. **Verify the output** exists and has a non-zero size. If the output file is missing or empty, report the failure and stop.
 
-8. **Config files**: if the user passed `--config <file>`, report which config file was used. Do not inspect or execute `hooks.*` entries as part of this workflow.
-
-9. **Report**:
+8. **Report**:
    - Input file and format
    - Output file and format
    - File size of the output

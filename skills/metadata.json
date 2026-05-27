@@ -1,38 +1,38 @@
 {
   "liteparse": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "parse-document": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "batch-parse": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "screenshot-document": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "merge-parsed": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "compare-documents": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "extract-tables": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "extract-structured": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "convert-format": {
     "author": "Local Workspace",
-    "version": "0.2.0"
+    "version": "0.3.0"
   }
 }

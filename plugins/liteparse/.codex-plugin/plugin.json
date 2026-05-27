@@ -1,7 +1,7 @@
 {
   "name": "liteparse",
-  "version": "0.2.0",
-  "description": "Local LiteParse skills for document parsing.",
+  "version": "0.3.0",
+  "description": "Local LiteParse v2 skills for document parsing.",
   "author": {
     "name": "Local Workspace"
   },
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "LiteParse",
-    "shortDescription": "Parse documents locally with OCR support",
-    "longDescription": "Use LiteParse inside Codex to parse PDFs, Office files, images, and scans locally. Includes OCR, screenshots, table extraction, structured fields, merging, comparisons, and conversion workflows.",
+    "shortDescription": "Parse documents locally with LiteParse v2",
+    "longDescription": "Use LiteParse v2 inside Codex to parse PDFs, Office files, images, and scans locally. Includes OCR, PNG screenshots, table extraction, structured fields, merging, comparisons, and conversion workflows.",
     "developerName": "Local Workspace",
     "category": "Productivity",
     "capabilities": [

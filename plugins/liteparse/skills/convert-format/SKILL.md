@@ -1,6 +1,6 @@
 ---
 name: convert-format
-description: Use when converting document formats with LibreOffice.
+description: Use when converting Office, CSV, or HTML documents with LibreOffice.
 ---
 
 # Convert Format

@@ -1,6 +1,6 @@
 ---
 name: compare-documents
-description: Use when comparing two documents with LiteParse.
+description: Use when diffing two PDFs or documents after LiteParse text extraction.
 ---
 
 # Compare Documents

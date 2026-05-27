@@ -13,7 +13,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
 
 1. **Resolve `$0`** relative to the project root. If it is missing or ambiguous, ask the user for the correct path. If the user passed no arguments at all, ask for a file path.
 2. **Check file-type dependencies**:
-   - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.ppt` `.pptx` `.pptm` `.odp` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv`): run `which libreoffice`. If absent, report it and stop.
+   - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.pages` `.ppt` `.pptx` `.pptm` `.odp` `.key` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv` `.numbers`): run `which libreoffice`. If absent, report it and stop.
    - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
    - PDFs: no extra dependency.
 3. **Choose the CLI**: run `which lit || which liteparse`. If either succeeds, use that binary as `<cli>` and run `<cli> parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
@@ -28,7 +28,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    trap 'rm -rf -- "$tmpdir"' EXIT
    <cli> parse <file> --format json -o "$tmpdir/raw.json"
    ```
-6. **Read the parsed JSON and extract field values**. Use the parsed pages, text items, OCR output, tables, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns.
+6. **Read the parsed JSON and extract field values**. Use the parsed pages, page text, `text_items`/`textItems`, OCR confidence, and bounding boxes to locate the best match for each field. Prefer direct label/value pairs, nearby text on the same page, and repeated section patterns.
 
    **Single-value fields** (`multiple: false`):
    - Emit as `{"value": <parsed>, "confidence": <0.0-1.0>, "evidence": {"page": <n>, "text": "<matching source text>"}}`.
@@ -64,9 +64,10 @@ Schemas loaded via `--schema` and written via `--save-schema` share the shape sh
 
 ```json
 {
-  "version": "1.0",
+  "version": 1,
   "name": "<recipe-name>",
-  "output": { "format": "json|jsonl|csv", "includeEvidence": true },
+  "output": { "format": "json|jsonl|csv" },
+  "includeEvidence": true,
   "fields": [
     {
       "name": "snake_case_id",

@@ -5,7 +5,7 @@ compatibility: Requires parsed output files from LiteParse (text or JSON).
 license: Apache-2.0
 metadata:
   author: Local Workspace
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Merge Parsed
