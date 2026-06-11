@@ -120,11 +120,21 @@ npx skills add cyanxxy/liteparse-agent-skills-claude-codex --skill compare-docum
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback)
-- Optional: Python 3.12+ for Python SDK or custom OCR server packages
-- Optional: `lit` installed globally (`npm i -g @llamaindex/liteparse`, `pip install liteparse`, `cargo install liteparse`, or `brew tap run-llama/liteparse && brew install llamaindex-liteparse`)
+- Optional: Python 3.10+ for the Python LiteParse package, Python SDK use, or custom OCR server packages
+- Optional: `lit` installed globally with the current npm (`npm i -g @llamaindex/liteparse@latest`), Python (`pip install "liteparse>=2.0.7"`), or Rust (`cargo install liteparse`) package. Do not use the Homebrew LiteParse formula as the primary v2 path; it has lagged upstream.
+- Optional: `@llamaindex/liteparse-wasm` for browser/edge PDF parsing experiments. It has no `lit` CLI and does not cover file-path input, Office conversion, built-in/HTTP OCR, or screenshots.
+- Optional: `liteparse-server` or LiteParse Docker images for a host/container parser service when an agent runtime cannot load the native CLI.
 - Optional: LibreOffice (for Office formats and the convert-format workflow)
 - Optional: ImageMagick (for image inputs)
 - Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs)
+
+### Claude Cowork Linux VM note
+
+Claude Cowork shell commands run inside an isolated Linux VM. Older LiteParse native binaries could fail before startup with loader errors such as `GLIBC_2.38 not found`, `GLIBC_2.39 not found`, or `GLIBCXX_3.4.31 not found`. LiteParse 2.0.6+ lowered the Linux GNU binary baseline, so first use the current package (`npx -y @llamaindex/liteparse@latest ...`, `npm i -g @llamaindex/liteparse@latest`, or `pip install "liteparse>=2.0.7"`).
+
+If a loader error still happens, stop and report the runtime incompatibility instead of retrying the same binary. Capture `uname -m`, `ldd --version`, and the exact error. Then try the Python wheel, build from source with `cargo install liteparse` inside the target VM, run LiteParse in a compatible container/server, or parse in a compatible host environment and bring the output files back into Cowork.
+
+For a Cowork-native user experience, the better long-term path is a host-side local MCP/server bridge: Cowork can run local plugin MCP servers on the host, while shell commands still run in the VM. This skill-only package does not include that bridge yet, but it is the practical way to keep LiteParse available from Cowork without depending on the VM's glibc.
 
 ## Credits
 

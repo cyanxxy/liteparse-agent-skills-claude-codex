@@ -2,7 +2,7 @@
 name: extract-tables
 description: Extract tables from a PDF, DOCX, XLSX, or PPTX file and output them as CSV or structured JSON. Use when pulling tabular data from documents for analysis, import, or downstream processing.
 argument-hint: "<file> [--csv | --json] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *) Bash(mkdir *)
+allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse@latest *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *) Bash(mkdir *)
 ---
 
 # Extract Tables
@@ -18,7 +18,7 @@ Parse a document with LiteParse in JSON mode and extract tabular data into CSV o
    - Image files: verify `which magick || which convert`.
    - PDFs: no extra dependency.
 
-3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse@latest`.
 
 4. **Create a per-run temp directory and parse the file as JSON**:
    ```bash

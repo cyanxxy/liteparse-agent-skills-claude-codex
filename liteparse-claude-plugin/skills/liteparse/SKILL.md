@@ -12,8 +12,11 @@ LiteParse v2 is a local, no-cloud document parser. This skill is **reference onl
 LiteParse v2 ships one `lit` CLI across package managers. The npm package also registers the `liteparse` alias.
 
 - **When `lit` or `liteparse` is on PATH**: use the installed binary alias that already exists in the environment for `parse`, `batch-parse`, and `screenshot`.
-- **When only `npm` / `npx` is available**: the `lit` prefix is dropped — `npx -y @llamaindex/liteparse parse`, `npx -y @llamaindex/liteparse batch-parse`, `npx -y @llamaindex/liteparse screenshot`.
-- **When neither is available**: Node.js 18+ and npm are required. Install with `npm i -g @llamaindex/liteparse` or via Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`), then verify with `lit --version` or `liteparse --version`.
+- **When only `npm` / `npx` is available**: the `lit` prefix is dropped — `npx -y @llamaindex/liteparse@latest parse`, `npx -y @llamaindex/liteparse@latest batch-parse`, `npx -y @llamaindex/liteparse@latest screenshot`.
+- **When neither is available**: Node.js 18+ and npm are required. Install with `npm i -g @llamaindex/liteparse@latest`, Python (`pip install "liteparse>=2.0.7"`), or Rust (`cargo install liteparse`), then verify with `lit --version` or `liteparse --version`. Treat `--version` as a smoke test; use the package manager when the exact patch version matters. Do not use the Homebrew LiteParse formula as the primary v2 path because it has lagged upstream.
+- **When a Linux VM reports `GLIBC_x.y not found` or `GLIBCXX_x.y.z not found`**: the native LiteParse binary cannot load in that VM. LiteParse 2.0.6+ lowered the Linux GNU binary baseline, so first try the current npm package or `pip install "liteparse>=2.0.7"`. If the error remains, stop and report the runtime incompatibility; capture `uname -m`, `ldd --version`, and the exact error. Recommend the Python wheel, a source build via `cargo install liteparse` inside the VM, a compatible container/server, or parsing in a compatible host environment and importing the output files.
+- **When running inside Claude Cowork**: shell commands run in the Linux VM, but local plugin MCP servers can run on the host. If the VM cannot load LiteParse, recommend a host-side MCP/server bridge rather than another CLI retry.
+- **When considering WASM**: `@llamaindex/liteparse-wasm` has no `lit` CLI. It can parse PDF bytes in browser/edge-style environments, but it is not a drop-in replacement for file-path input, Office conversion, built-in/HTTP OCR, or screenshots.
 
 ### Installing extra dependencies
 
@@ -65,6 +68,7 @@ apt-get install imagemagick
 - `--target-pages "1-5,10"`
 - `--dpi <n>` (default 150)
 - `--preserve-small-text` (keeps very small text that would otherwise be dropped)
+- `--config <file>` when the active CLI exposes it (the npm CLI exposes this flag; official cross-package docs may not)
 - `--password <pw>` for encrypted documents (**caution**: the password is visible in process lists and shell history)
 - `-q, --quiet`
 
@@ -206,6 +210,9 @@ When proposing a chain, always show the user the intermediate artifacts (temp fi
 | Symptom | Cause |
 |---|---|
 | `lit`/`liteparse` not found and `npm` not found | Node.js 18+ and npm are not installed |
+| Loader error mentions `GLIBC_x.y not found` or `GLIBCXX_x.y.z not found` | The Linux VM is older than the native LiteParse binary expects. First try current LiteParse (`@latest` or `liteparse>=2.0.7`), then use the Python wheel, a source build in that VM, a compatible container/server, or a compatible host environment. |
+| Claude Cowork VM cannot load the native CLI | Keep the workflow in Cowork by using a host-side MCP/server bridge, or parse in a compatible host/container and import the outputs. |
+| WASM package requested as a fallback | It has no CLI and only covers PDF-byte parsing with custom JS OCR; it does not support the full command-skill surface. |
 | LibreOffice conversion error on Office input | `libreoffice` is not on PATH |
 | ImageMagick error on image input | Neither `magick` nor `convert` is on PATH |
 | OCR server connection refused | The `--ocr-server-url` is unreachable; drop the flag to fall back to built-in Tesseract |

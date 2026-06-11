@@ -2,7 +2,7 @@
 name: extract-structured
 description: Extract user-defined fields (invoice numbers, dates, totals, parties, line items, etc.) from PDFs, Office docs, and images into repeatable structured JSON, JSONL, or CSV. Use whenever specific named fields must be pulled from a document, inline or via a saved schema.
 argument-hint: "<file> [--fields \"<field list/spec>\"] [--schema <file>] [--save-schema <file>] [--json|--jsonl|--csv] [-o output]"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
+allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse@latest *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---
 
 # Extract Structured
@@ -16,7 +16,7 @@ Extract user-defined fields from a document by first parsing it with LiteParse a
    - Office files (`.doc` `.docx` `.docm` `.odt` `.rtf` `.pages` `.ppt` `.pptx` `.pptm` `.odp` `.key` `.xls` `.xlsx` `.xlsm` `.ods` `.csv` `.tsv` `.numbers`): run `which libreoffice`. If absent, report it and stop.
    - Image files (`.jpg` `.jpeg` `.png` `.gif` `.bmp` `.tiff` `.webp` `.svg`): run `which magick || which convert`. If neither exists, report it and stop.
    - PDFs: no extra dependency.
-3. **Choose the CLI**: run `which lit || which liteparse`. If either succeeds, use that binary as `<cli>` and run `<cli> parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse parse ...` (subcommand only — no `lit` prefix under npx).
+3. **Choose the CLI**: run `which lit || which liteparse`. If either succeeds, use that binary as `<cli>` and run `<cli> parse ...`. Otherwise, fall back to `npx -y @llamaindex/liteparse@latest parse ...` (subcommand only — no `lit` prefix under npx).
 4. **Decide the extraction schema** (precedence: `--schema` > `--fields` > ask):
    - If the user passed `--schema <file>`, read that file and treat it as the stable contract for this run. If `--fields` was also passed, the schema wins — note the ignored `--fields` in the final report so the user can resolve it.
    - Otherwise, if the user passed `--fields`, normalize the loose request into a canonical schema before extracting. Default inferred fields to optional single-value `string` fields and generate stable `snake_case` names when the user does not provide one.

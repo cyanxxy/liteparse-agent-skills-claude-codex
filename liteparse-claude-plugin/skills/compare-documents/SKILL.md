@@ -2,7 +2,7 @@
 name: compare-documents
 description: Parse two documents and produce a structured diff showing what changed between them. Use for diffing contract versions, comparing resume revisions, reviewing spec updates, redline reviews, seeing what changed between two PDFs or Word files, or any "what's different between these two files" request.
 argument-hint: "<file-a> <file-b>"
-allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse *) Bash(diff *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
+allowed-tools: Read Write Bash(which *) Bash(lit *) Bash(liteparse *) Bash(npx -y @llamaindex/liteparse@latest *) Bash(diff *) Bash(mktemp *) Bash(libreoffice *) Bash(magick *) Bash(convert *)
 ---
 
 # Compare Documents
@@ -19,7 +19,7 @@ Parse two documents with LiteParse and diff their text content.
    - PDFs: no extra dependency.
    Stop and report if a required tool is missing.
 
-3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse@latest`.
 
 4. **Create a per-run temp directory**:
    ```bash

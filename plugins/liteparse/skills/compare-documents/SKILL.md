@@ -11,7 +11,7 @@ Parse two files to text and diff them.
 
 1. Resolve both paths; ask only when fewer than two were provided.
 2. Check dependencies for each input type.
-3. Use `lit` or `liteparse`; otherwise run `npx -y @llamaindex/liteparse`.
+3. Use `lit` or `liteparse`; otherwise run `npx -y @llamaindex/liteparse@latest`.
 4. Parse both files with `parse --format text` into a temp directory.
 5. Run `diff -u`; write to `-o <path>` if supplied.
 6. Report files, identical/different status, diff or output path, concise change summary, and exact parse errors.

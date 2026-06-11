@@ -33,13 +33,23 @@ An example reusable schema lives at [`examples/invoice.extract.json`](examples/i
 ## Requirements
 
 - Node.js 18+ and `npm` (for the `npx` fallback).
-- Optional: Python 3.12+ for Python SDK or custom OCR server packages.
-- Optional: `lit` installed globally via npm (`npm i -g @llamaindex/liteparse`), Python (`pip install liteparse`), Rust (`cargo install liteparse`), or Homebrew (`brew tap run-llama/liteparse && brew install llamaindex-liteparse`).
+- Optional: Python 3.10+ for the Python LiteParse package, Python SDK use, or custom OCR server packages.
+- Optional: `lit` installed globally with the current npm (`npm i -g @llamaindex/liteparse@latest`), Python (`pip install "liteparse>=2.0.7"`), or Rust (`cargo install liteparse`) package. Do not use the Homebrew LiteParse formula as the primary v2 path; it has lagged upstream.
+- Optional: `@llamaindex/liteparse-wasm` for browser/edge PDF parsing experiments. It has no `lit` CLI and does not cover file-path input, Office conversion, built-in/HTTP OCR, or screenshots.
+- Optional: `liteparse-server` or LiteParse Docker images for a host/container parser service when an agent runtime cannot load the native CLI.
 - Optional: LibreOffice for Office documents (`docx`, `xlsx`, `pptx`, `odt`, ...).
 - Optional: ImageMagick (`magick` or `convert`) for image inputs (`png`, `jpg`, `tiff`, `webp`, `svg`, ...).
 - Optional env vars: `TESSDATA_PREFIX` (offline OCR language packs).
 
-If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse`.
+If `lit` is not on `PATH`, the skills fall back to `npx -y @llamaindex/liteparse@latest`.
+
+### Linux VM note
+
+On older Linux VMs, LiteParse native binaries can fail before startup with loader errors such as `GLIBC_2.38 not found`, `GLIBC_2.39 not found`, or `GLIBCXX_3.4.31 not found`. LiteParse 2.0.6+ lowered the Linux GNU binary baseline, so first use the current package (`npx -y @llamaindex/liteparse@latest ...`, `npm i -g @llamaindex/liteparse@latest`, or `pip install "liteparse>=2.0.7"`).
+
+If a loader error still happens, stop and report the runtime incompatibility instead of retrying the same binary. Capture `uname -m`, `ldd --version`, and the exact error. Then try the Python wheel, build from source with `cargo install liteparse` inside the target VM, run LiteParse in a compatible container/server, or parse in a compatible host environment and bring the output files back.
+
+For runtimes with host-side MCP support, a local MCP/server bridge can expose LiteParse from a compatible host process while the agent UI remains in the restricted runtime.
 
 ## Install
 

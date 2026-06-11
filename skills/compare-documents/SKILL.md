@@ -22,7 +22,7 @@ Parse two documents with LiteParse and diff their text content.
    - PDFs: no extra dependency.
    Stop and report if a required tool is missing.
 
-3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse`.
+3. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>`. Otherwise, use `npx -y @llamaindex/liteparse@latest`.
 
 4. **Create a per-run temp directory**:
    ```bash

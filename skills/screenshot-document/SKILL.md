@@ -18,7 +18,7 @@ Generate PNG page screenshots from a supported document.
 2. **Check file-type dependencies**: Office files require `libreoffice`; image files require `magick` or `convert`; PDFs need no extra dependency.
 3. **Resolve the output directory**. The upstream CLI default is `./screenshots` (relative to the current working directory). For clarity when running on multiple documents, prefer `<basename>-screenshots` and create it with `mkdir -p` if it does not exist.
 4. **Parse extra flags**: `--target-pages "1,3,5"` or `"1-5"`, `--dpi <n>`, `--password <pw>`, `-q`. LiteParse v2 outputs PNG files only.
-5. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>` and run `<cli> screenshot <file> -o <output-dir> <flags>`. Otherwise, fall back to `npx -y @llamaindex/liteparse screenshot <file> -o <output-dir> <flags>` (no `lit` prefix under npx). **Always pass the output directory via `-o`** — it is not a positional argument.
+5. **Choose the CLI**: run `which lit || which liteparse`. If either exists, use that binary as `<cli>` and run `<cli> screenshot <file> -o <output-dir> <flags>`. Otherwise, fall back to `npx -y @llamaindex/liteparse@latest screenshot <file> -o <output-dir> <flags>` (no `lit` prefix under npx). **Always pass the output directory via `-o`** — it is not a positional argument.
 6. **Report**:
    - source file,
    - page selection (default: all pages),
